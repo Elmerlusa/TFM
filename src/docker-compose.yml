@@ -1,0 +1,14 @@
+services:
+  database:
+    image: mongo:8.0.6
+    container_name: database
+    env_file:
+      - ./.env
+    volumes:
+      - ./.volumes/mongodb:/data/db
+    networks:
+      - tfm_network
+    restart: always
+
+networks:
+  tfm_network:
