@@ -1,0 +1,20 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: ciberataques
+  profiles:
+    active: dev
+  data:
+    mongodb:
+      authentication-database: admin
+      database: cyberattacks
+      port: 27017
+      host: localhost
+
+logging:
+  level:
+    org:
+      springframework:
+        web: WARN
