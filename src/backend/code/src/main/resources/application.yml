@@ -5,13 +5,12 @@ spring:
   application:
     name: ciberataques
   profiles:
-    active: dev
+    active: docker
   data:
     mongodb:
       authentication-database: admin
       database: cyberattacks
       port: 27017
-      host: localhost
 
 logging:
   level:

@@ -12,5 +12,19 @@ services:
       - tfm_network
     restart: always
 
+  backend:
+    container_name: cyberattacks_backend
+    build: ./backend/
+    image: cyberattacks_backend
+    env_file:
+      - ./.env
+    ports:
+      - 8080:8080
+    networks:
+      - tfm_network
+    depends_on:
+      - database
+    restart: always
+
 networks:
   tfm_network:
