@@ -1,6 +1,7 @@
 package cyberattacksPortal.backend.model;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Set;
 
 import org.springframework.data.annotation.Id;
@@ -20,4 +21,5 @@ public class Cybercriminal {
 	private Set<String> wallets;
 	private LocalDateTime lastAttackAt;
 	private CybercriminalStats stats;
+	private List<AttackDTO> attacks;
 }

@@ -26,5 +26,8 @@ re: kill down rm up
 logs:
 	docker compose -f ./src/docker-compose.yml logs
 
+databaseup:
+	docker compose -f ./src/docker-compose.yml up -d database
+
 mongoshell:
 	docker exec -it database mongosh -u ${MONGO_INITDB_ROOT_USERNAME} -p ${MONGO_INITDB_ROOT_PASSWORD}

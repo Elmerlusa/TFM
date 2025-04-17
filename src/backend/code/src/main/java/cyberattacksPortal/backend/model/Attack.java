@@ -22,6 +22,8 @@ public class Attack {
 	private String reputationalImpact;
 	private Integer downtimeHours;
 	private Target target;
-	private String attackerId;
 	private String cybercriminalName;
+
+	// Calculados
+	private Cybercriminal cybercriminal;
 }

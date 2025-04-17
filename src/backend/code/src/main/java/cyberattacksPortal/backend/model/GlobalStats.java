@@ -1,6 +1,9 @@
 package cyberattacksPortal.backend.model;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
+import java.util.List;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -17,6 +20,10 @@ public class GlobalStats {
 	private LinkedHashMap<String, Integer> attacksBySector;
 	private LinkedHashMap<String, Integer> attacksByTarget;
 	private LinkedHashMap<String, Integer> attacksByType;
-	private Integer numGroups;
-	private Integer totalAttacks;
+	private Long numGroups;
+	private Long totalAttacks;
+
+	// Calculados
+	private Long totalAttacksThreeMonths;
+	private LinkedHashMap<LocalDate, Integer> attacksByDate;
 }
