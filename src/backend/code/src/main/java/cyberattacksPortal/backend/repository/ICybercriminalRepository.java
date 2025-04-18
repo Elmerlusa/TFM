@@ -12,6 +12,8 @@ import cyberattacksPortal.backend.model.Cybercriminal;
 @Repository
 public interface ICybercriminalRepository extends MongoRepository<Cybercriminal, String> {
 	
+	Optional<Cybercriminal> findByName(final String name);
+
 	@Query(value = "{}", fields = """
 	{
 		'name': 1,
@@ -19,8 +21,6 @@ public interface ICybercriminalRepository extends MongoRepository<Cybercriminal,
 		'stats.totalAttacks': 1,
 		'_id': 0
 	}
-	""")
+	""", sort = "{'name': 1}")
 	List<Cybercriminal> findAbstractAll();
-
-	Optional<Cybercriminal> findByName(final String name);
 }

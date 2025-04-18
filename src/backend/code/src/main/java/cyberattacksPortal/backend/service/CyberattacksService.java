@@ -1,8 +1,11 @@
 package cyberattacksPortal.backend.service;
 
 import java.time.LocalDate;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -98,9 +101,43 @@ public class CyberattacksService implements ICyberattacksService {
 		}
 		globalStats = globalStatsList.get(0);
 		totalAttacksThreeMonths = globalStats.getAttacksByDate().entrySet().stream()
-			.filter(e -> threeMonthsAgo.isAfter(e.getKey())).count();
+			.filter(e -> threeMonthsAgo.isBefore(e.getKey())).count();
 		globalStats.setTotalAttacksThreeMonths(totalAttacksThreeMonths);
+		sortStatsMaps(globalStats);
 		return globalStats;
+	}
+
+	private void sortStatsMaps(final GlobalStats globalStats) {
+		globalStats.setAttacksByGroup(
+			globalStats.getAttacksByGroup().entrySet().stream()
+			.sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
+			.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new))
+		);
+		globalStats.setAttacksByType(
+			globalStats.getAttacksByType().entrySet().stream()
+			.sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
+			.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new))
+		);
+		globalStats.setAttacksByRegion(
+			globalStats.getAttacksByRegion().entrySet().stream()
+			.sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
+			.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new))
+		);
+		globalStats.setAttacksBySector(
+			globalStats.getAttacksBySector().entrySet().stream()
+			.sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
+			.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new))
+		);
+		globalStats.setAttacksByTarget(
+			globalStats.getAttacksByTarget().entrySet().stream()
+			.sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
+			.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new))
+		);
+		globalStats.setAttacksByDate(
+			globalStats.getAttacksByDate().entrySet().stream()
+			.sorted(Map.Entry.comparingByKey())
+			.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new))
+		);
 	}
 
 	private AttackDTO attackToDTO(final Attack attack) {

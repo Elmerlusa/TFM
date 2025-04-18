@@ -9,9 +9,8 @@ import org.springframework.data.mongodb.repository.Query;
 import cyberattacksPortal.backend.model.Attack;
 
 public interface IAttackRepository extends MongoRepository<Attack, String> {
-
-	@Query(value = "{}", fields = "{'detectedAt': 1 }")
-	List<Attack> findDetectedAtAll();
+	
+	Optional<Attack> findById(final Integer id);
 
 	@Query(value = "{}", fields = """
 	{
@@ -20,7 +19,7 @@ public interface IAttackRepository extends MongoRepository<Attack, String> {
 		'target.name': 1,
 		'cybercriminalName': 1
 	}
-	""")
+	""", sort = "{'detectedAt': -1}")
 	List<Attack> findAbstractAll();
 
 	@Query(value = "{'cybercriminalName': '?0'}", fields = """
@@ -30,8 +29,6 @@ public interface IAttackRepository extends MongoRepository<Attack, String> {
 		'target.name': 1,
 		'cybercriminalName': 1
 	}
-	""")
+	""", sort = "{'detectedAt': -1}")
 	List<Attack> findAbstractAllByCybercriminalName(final String cybercriminalName);
-
-	Optional<Attack> findById(final Integer id);
 }
