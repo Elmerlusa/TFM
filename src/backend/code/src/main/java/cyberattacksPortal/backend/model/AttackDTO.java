@@ -3,7 +3,7 @@ package cyberattacksPortal.backend.model;
 import java.time.LocalDateTime;
 
 public record AttackDTO (
-	Integer incidentId,
+	Integer id,
 	LocalDateTime detectedAt,
 	String type,
 	String targetName,

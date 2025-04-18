@@ -26,7 +26,7 @@ public class Controller {
 	@GetMapping("")
 	public void index(final HttpServletResponse response) {
 		try {
-			response.sendRedirect("/estadisticas");
+			response.sendRedirect("/ciberataques");
 		} catch (final IOException e) {
 			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "error");
 		}
@@ -42,9 +42,9 @@ public class Controller {
 		return this.cyberattacksService.getCybercriminals();
 	}
 
-	@GetMapping("/ciberataques/{incidentId}")
-	public Attack getAttack(@PathVariable final Integer incidentId) {
-		return this.cyberattacksService.getAttack(incidentId);
+	@GetMapping("/ciberataques/{id}")
+	public Attack getAttack(@PathVariable final Integer id) {
+		return this.cyberattacksService.getAttack(id);
 	}
 
 	@GetMapping("/ciberdelincuentes/{name}")

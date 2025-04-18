@@ -1,6 +1,7 @@
 package cyberattacksPortal.backend.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
@@ -10,6 +11,7 @@ import cyberattacksPortal.backend.model.Cybercriminal;
 
 @Repository
 public interface ICybercriminalRepository extends MongoRepository<Cybercriminal, String> {
+	
 	@Query(value = "{}", fields = """
 	{
 		'name': 1,
@@ -19,5 +21,6 @@ public interface ICybercriminalRepository extends MongoRepository<Cybercriminal,
 	}
 	""")
 	List<Cybercriminal> findAbstractAll();
-	Cybercriminal findByName(final String name);
+
+	Optional<Cybercriminal> findByName(final String name);
 }

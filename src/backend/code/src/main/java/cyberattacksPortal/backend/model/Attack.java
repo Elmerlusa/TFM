@@ -11,8 +11,7 @@ import lombok.Data;
 @Data
 public class Attack {
 	@Id
-	private String id;
-	private Integer incidentId;
+	private Integer id;
 	private LocalDateTime detectedAt;
 	private LocalDateTime notifiedAt;
 	private String type;

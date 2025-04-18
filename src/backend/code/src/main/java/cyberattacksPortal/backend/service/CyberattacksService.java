@@ -1,10 +1,8 @@
 package cyberattacksPortal.backend.service;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -52,29 +50,29 @@ public class CyberattacksService implements ICyberattacksService {
 	}
 
 	@Override
-	public Attack getAttack(final Integer incidentId) {
-		final Attack attack = this.attackRepository.findByIncidentId(incidentId);
-		Cybercriminal cybercriminal;
+	public Attack getAttack(final Integer id) {
+		final Optional<Attack> attack = this.attackRepository.findById(id);
+		Optional<Cybercriminal> cybercriminal;
 
-		if (attack == null) {
-			log.warn("ciberataque con id {} no encontrado", incidentId);
+		if (attack.isEmpty()) {
+			log.warn("ciberataque con id {} no encontrado", id);
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "incidente no encontrado");
 		}
-		cybercriminal = this.cybercriminalRepository.findByName(attack.getCybercriminalName());
-		if (cybercriminal == null) {
-			log.warn("ciberdelincuente {} no encontrado", attack.getCybercriminalName());
+		cybercriminal = this.cybercriminalRepository.findByName(attack.get().getCybercriminalName());
+		if (cybercriminal.isEmpty()) {
+			log.warn("ciberdelincuente {} no encontrado", attack.get().getCybercriminalName());
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "ciberdelincuente no encontrado");
 		}
-		attack.setCybercriminal(cybercriminal);
-		return attack;
+		attack.get().setCybercriminal(cybercriminal.get());
+		return attack.get();
 	}
 
 	@Override
 	public Cybercriminal getCybercriminal(final String name) {
-		final Cybercriminal cybercriminal = this.cybercriminalRepository.findByName(name);
+		final Optional<Cybercriminal> cybercriminal = this.cybercriminalRepository.findByName(name);
 		List<Attack> attacks;
 		
-		if (cybercriminal == null) {
+		if (cybercriminal.isEmpty()) {
 			log.warn("ciberdelincuente {} no encontrado", name);
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "ciberdelincuente no encontrado");
 		}
@@ -83,38 +81,31 @@ public class CyberattacksService implements ICyberattacksService {
 			log.warn("ciberdelincuente {} sin ataques", name);
 			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "error");
 		}
-		cybercriminal.setAttacks(attacks.stream().map(this::attackToDTO).toList());
-		return cybercriminal;
+		cybercriminal.get().setAttacks(attacks.stream().map(this::attackToDTO).toList());
+		return cybercriminal.get();
 	}
 
 	@Override
 	public GlobalStats getGlobalStats() {
 		final List<GlobalStats> globalStatsList = this.globalStatsRepository.findAll();
-		final List<LocalDate> attackDates = this.attackRepository.findDetectedAtAll().stream()
-			.map(a -> a.getDetectedAt().toLocalDate()).toList();
 		LocalDate threeMonthsAgo = LocalDate.now().minusMonths(3);
-		Long totalAttacksThreeMonths;
-		LinkedHashMap<LocalDate, Integer> attacksByDate;
 		GlobalStats globalStats;
+		Long totalAttacksThreeMonths;
 
-		if (globalStatsList.isEmpty() || attackDates.isEmpty()) {
+		if (globalStatsList.isEmpty()) {
 			log.error("no existen datos sobre estadísticas globales");
 			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "error");
 		}
 		globalStats = globalStatsList.get(0);
-		totalAttacksThreeMonths = attackDates.stream()
-			.filter(d -> threeMonthsAgo.isBefore(d))
-			.count();
+		totalAttacksThreeMonths = globalStats.getAttacksByDate().entrySet().stream()
+			.filter(e -> threeMonthsAgo.isAfter(e.getKey())).count();
 		globalStats.setTotalAttacksThreeMonths(totalAttacksThreeMonths);
-		attacksByDate = attackDates.stream()
-			.collect(Collectors.toMap(d -> d, d -> 1, Integer::sum, LinkedHashMap::new));
-		globalStats.setAttacksByDate(attacksByDate);
 		return globalStats;
 	}
 
 	private AttackDTO attackToDTO(final Attack attack) {
 		return new AttackDTO(
-			attack.getIncidentId(),
+			attack.getId(),
 			attack.getDetectedAt(),
 			attack.getType(),
 			attack.getTarget().getName(),
