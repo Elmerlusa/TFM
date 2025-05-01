@@ -5,27 +5,27 @@ import CybercriminalList from './components/CybercriminalList';
 import CybercriminalDetails from './components/CybercriminalDetails';
 import Statistics from './components/Statistics';
 import ErrorDetails from './components/ErrorDetails';
-import CyberattackNavbar from './components/Navbar';
+import MyNavbar from './components/base/MyNavbar';
+import MyHeader from './components/base/MyHeader';
 
 const App = () => {
   return (
     <>
-      <link
-        rel="stylesheet"
-        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css"
-        integrity="sha384-SgOJa3DmI69IUzQ2PVdRZhwQ+dy64/BUtbMJw1MZ8t5HZApcHrRKUc4W0kG879m7"
-        crossOrigin="anonymous"
-      />
-      <CyberattackNavbar />
-      <Routes>
-        <Route index element={<Navigate to="/ciberataques" replace/>} />
-        <Route path="ciberataques" element={<CyberattackList />} />
-        <Route path="ciberataques/:id" element={<CyberattackDetails />} />
-        <Route path="cibercriminales" element={<CybercriminalList />} />
-        <Route path="cibercriminales/:name" element={<CybercriminalDetails />} />
-        <Route path="estadisticas" element={<Statistics />} />
-        <Route path="*" element={<ErrorDetails />} />
-      </Routes>
+      <MyHeader />
+      <MyNavbar />
+      <main className="p-5">  
+        <Routes>
+          <Route index element={<Navigate to="/ciberataques" replace/>} />
+          <Route path="ciberataques" element={<CyberattackList />}>
+            <Route path=":id" element={<CyberattackDetails />} />
+          </Route>
+          <Route path="cibercriminales" element={<CybercriminalList />}>
+            <Route path=":name" element={<CybercriminalDetails />} />
+          </Route>
+          <Route path="estadisticas" element={<Statistics />} />
+          <Route path="*" element={<ErrorDetails />} />
+        </Routes> 
+      </main>
     </>
   );
 }
