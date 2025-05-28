@@ -1,32 +1,34 @@
 import { Navigate, Route, Routes } from 'react-router';
-import CyberattackList from './components/CyberattackList';
-import CyberattackDetails from './components/CyberattackDetails';
-import CybercriminalList from './components/CybercriminalList';
-import CybercriminalDetails from './components/CybercriminalDetails';
-import Statistics from './components/Statistics';
-import ErrorDetails from './components/ErrorDetails';
-import MyNavbar from './components/base/MyNavbar';
-import MyHeader from './components/base/MyHeader';
+import MyNavbar from './components/MyNavbar';
+import MyHeader from './components/MyHeader';
+import Cyberattacks from './pages/Cyberattacks';
+import CyberattackDetails from './pages/CyberattackDetails';
+import Cybercriminals from './pages/Cybercriminals';
+import CybercriminalDetails from './pages/CybercriminalDetails';
+import GlobalStats from './pages/GlobalStats';
+import ErrorDetails from './pages/ErrorDetails';
+import MyFooter from './components/MyFooter';
 
 const App = () => {
   return (
-    <>
+    <div className='min-vh-100 d-flex flex-column text-white'>
       <MyHeader />
       <MyNavbar />
-      <main className="p-5">  
+      <main className="flex-grow-1 p-5" style={{ backgroundColor: '#0d1117' }}>  
         <Routes>
           <Route index element={<Navigate to="/ciberataques" replace/>} />
-          <Route path="ciberataques" element={<CyberattackList />}>
+          <Route path="ciberataques" element={<Cyberattacks />}>
             <Route path=":id" element={<CyberattackDetails />} />
           </Route>
-          <Route path="cibercriminales" element={<CybercriminalList />}>
+          <Route path="cibercriminales" element={<Cybercriminals />}>
             <Route path=":name" element={<CybercriminalDetails />} />
           </Route>
-          <Route path="estadisticas" element={<Statistics />} />
+          <Route path="estadisticas" element={<GlobalStats />} />
           <Route path="*" element={<ErrorDetails />} />
-        </Routes> 
+        </Routes>
       </main>
-    </>
+      <MyFooter />
+    </div>
   );
 }
 

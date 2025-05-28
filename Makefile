@@ -31,3 +31,7 @@ databaseup:
 
 mongoshell:
 	docker exec -it database mongosh -u ${MONGO_INITDB_ROOT_USERNAME} -p ${MONGO_INITDB_ROOT_PASSWORD}
+
+frontdev:
+	npm start --prefix src/frontend
+

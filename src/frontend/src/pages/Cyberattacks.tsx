@@ -1,0 +1,47 @@
+import { ICyberattackAbstract } from "../Interfaces";
+import { useEffect, useState } from "react";
+import { Container, Row, Spinner } from "react-bootstrap";
+import { Outlet, useParams } from "react-router";
+import CyberattackCard from "../components/CyberattackCard";
+
+const Cyberattacks = () => {
+	const [cyberattacks, setCyberattacks] = useState<ICyberattackAbstract[]>([]);
+	const { id } = useParams();
+
+	useEffect(() => {
+		if (id)
+			return;
+		fetch('/ciberataques')
+			.then(response => response.json())
+			.then(data => {
+				const parsedData = [...data].map(d => {
+					return {
+						...d,
+						detectedAt: new Date(d.detectedAt)
+					};
+				});
+
+				setCyberattacks(parsedData);
+			})
+			.catch(() => alert('ERROR'));
+	}, [id]);
+
+	if (id)
+		return <Outlet />;
+	if (!cyberattacks) {
+		return (
+			<Container>
+				<Row>
+					<Spinner animation="grow" className="m-auto" />
+				</Row>
+			</Container>
+		);
+	}
+	return (
+		<Container className="card-animate">
+			{cyberattacks.map(c => <CyberattackCard cyberattack={c} key={c.id}/>)}
+		</Container>
+	);
+};
+
+export default Cyberattacks;

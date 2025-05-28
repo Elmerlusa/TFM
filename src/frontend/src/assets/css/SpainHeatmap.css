@@ -1,0 +1,8 @@
+.all-scroll-pointer:hover {
+	cursor: all-scroll;
+}
+
+.dark-hover:hover {
+	background-color: black !important;
+	color: white;
+}
