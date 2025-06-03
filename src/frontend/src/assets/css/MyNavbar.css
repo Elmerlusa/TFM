@@ -1,8 +1,9 @@
 .navlink {
-	background-color: #dc3545;
+	border: 1px solid white;
 	transition: background-color 0.3s ease;
 }
 
 .navlink:hover {
-	background-color: #b60012;
+	background-color: white;
+	color: black !important;
 }

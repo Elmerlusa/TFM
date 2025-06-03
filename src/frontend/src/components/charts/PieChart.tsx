@@ -1,27 +1,39 @@
 import * as d3 from "d3";
 import { ICategoryCount } from "../../Interfaces";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 
 interface Props {
 	data: ICategoryCount | undefined,
 	title: string,
-	footer?: string,
-	width?: number,
-	height?: number,
 }
 
-const PieChart = ({ data, title, footer = "", width = 500, height = 400 }: Props) => {
+const PieChart = ({ 
+	data,
+	title
+}: Props) => {
 	const ref = useRef<SVGSVGElement | null>(null);
+	const containerRef = useRef<HTMLDivElement | null>(null);
+	const [dimensions, setDimensions] = useState({ width: 500, height: 500 });
 
-	useEffect(() => {
-		if (!data)
-			return;
+	// Función para actualizar las dimensiones
+	const updateDimensions = useCallback(() => {
+		if (containerRef.current) {
+			const containerWidth = containerRef.current.offsetWidth;
+			const newWidth = containerWidth;
+			const newHeight = newWidth / 1.25;
+			
+			setDimensions({ width: newWidth, height: newHeight });
+		}
+	}, []);
 
-		const svg = d3.select(ref.current);
-		svg.selectAll("*").remove();
-
-		const margin = 80;
-		const radius = (Math.min(width, height) - margin) / 2;
+	// Función para crear los sectores del gráfico de tarta
+	const createPieSlices = useCallback((
+		svg: d3.Selection<SVGSVGElement | null, unknown, null, undefined>,
+		data: ICategoryCount,
+		currentWidth: number,
+		currentHeight: number,
+		radius: number
+	) => {
 		const color = d3.scaleOrdinal<string>()
 			.domain(Object.keys(data))
 			.range(d3.schemeBlues[Object.values(data).length <= 9 ? Object.values(data).length : 9]);
@@ -39,15 +51,16 @@ const PieChart = ({ data, title, footer = "", width = 500, height = 400 }: Props
 
 		const chart = svg
 			.append("g")
-			.attr("transform", `translate(${width / 2}, ${height / 2})`);
+			.attr("transform", `translate(${currentWidth / 2}, ${currentHeight / 2})`);
 
+		// Animar creación
 		chart.selectAll("path")
 			.data(arcs)
 			.join("path")
 			.attr("d", arcGenerator)
 			.attr("fill", (_, i) => color(labels[i]))
 			.attr("stroke", "#fff")
-			.attr("stroke-width", 1)
+			.attr("stroke-width", Math.max(1, currentWidth / 500))
 			.transition()
 			.duration(800)
 			.attrTween("d", function (d) {
@@ -57,47 +70,160 @@ const PieChart = ({ data, title, footer = "", width = 500, height = 400 }: Props
 				};
 			});
 
+		return { chart, arcs, labels };
+	}, []);
+
+	const addPieLabels = useCallback((
+		chart: d3.Selection<SVGGElement, unknown, null, undefined>,
+		arcs: d3.PieArcDatum<number>[],
+		labels: string[],
+		data: ICategoryCount,
+		radius: number,
+		currentWidth: number
+	) => {
 		const labelArc = d3.arc<d3.PieArcDatum<number>>()
 			.innerRadius(radius * 0.6)
 			.outerRadius(radius * 0.6);
 
 		const total = d3.sum(Object.values(data));
+		const fontSize = Math.max(10, 12 * (currentWidth / 500));
 
 		chart.selectAll("text")
 			.data(arcs)
 			.join("text")
 			.attr("transform", (d) => `translate(${labelArc.centroid(d)})`)
 			.attr("text-anchor", "middle")
-			.attr("font-size", "12px")
+			.attr("font-size", `${fontSize}px`)
+			.attr("fill", "black")
 			.text((d, i) => {
 				const percent = 100 * d.value / total;
+				const labelText = labels[i];
+				
+				if (currentWidth < 400) {
+					return percent > 5 ? `${percent.toFixed(0)}%` : "";
+				} else if (currentWidth < 600) {
+					const shortLabel = labelText.length > 8 ? labelText.slice(0, 8) + "..." : labelText;
+					return `${shortLabel} (${percent.toFixed(1)}%)`;
+				} else {
+					return `${labelText} (${percent.toFixed(2)}%)`;
+				}
+			})
+			.style("opacity", 0)
+			.transition()
+			.delay(500)
+			.duration(500)
+			.style("opacity", 1);
+	}, []);
 
-				return `${labels[i]} (${percent.toFixed(2)}%)`;
+	const createLegend = useCallback((
+		svg: d3.Selection<SVGSVGElement | null, unknown, null, undefined>,
+		data: ICategoryCount,
+		currentWidth: number,
+		currentHeight: number
+	) => {
+		if (currentWidth < 600) return; // No mostrar leyenda en pantallas pequeñas
+
+		const labels = Object.keys(data);
+		const values = Object.values(data);
+		const total = d3.sum(values);
+		
+		const color = d3.scaleOrdinal<string>()
+			.domain(labels)
+			.range(d3.schemeBlues[labels.length <= 9 ? labels.length : 9]);
+
+		const legend = svg.append("g")
+			.attr("class", "legend")
+			.attr("transform", `translate(${currentWidth - 150}, 50)`);
+
+		const legendItems = legend.selectAll(".legend-item")
+			.data(labels)
+			.join("g")
+			.attr("class", "legend-item")
+			.attr("transform", (_, i) => `translate(0, ${i * 20})`);
+
+		legendItems.append("rect")
+			.attr("width", 12)
+			.attr("height", 12)
+			.attr("fill", d => color(d));
+
+		legendItems.append("text")
+			.attr("x", 18)
+			.attr("y", 6)
+			.attr("dy", "0.35em")
+			.attr("font-size", "11px")
+			.attr("fill", "white")
+			.text((d, i) => {
+				const percent = 100 * values[i] / total;
+				return `${d} (${percent.toFixed(1)}%)`;
 			});
+	}, []);
 
-		// Title
+	const addTitle = useCallback((
+		svg: d3.Selection<SVGSVGElement | null, unknown, null, undefined>,
+		title: string,
+		currentWidth: number,
+		currentHeight: number
+	) => {
+		const titleFontSize = Math.max(12, 16 * (currentWidth / 500));
 		svg.append("text")
-			.attr("x", width / 2)
+			.attr("x", currentWidth / 2)
 			.attr("y", 30)
 			.attr("text-anchor", "middle")
-			.attr("font-size", "16px")
+			.attr("font-size", `${titleFontSize}px`)
 			.attr("font-weight", "bold")
+			.attr("fill", "white")
 			.text(title);
+	}, []);
 
-		// Footer
-		svg.append("text")
-			.attr("x", width / 2)
-			.attr("y", height - 20)
-			.attr("text-anchor", "middle")
-			.attr("font-size", "12px")
-			.attr("fill", "#555")
-			.text(footer);
-	}, [data, title, footer, width, height]);
+	// Renderizar gráfico
+	const renderChart = useCallback(() => {
+		if (!data) return;
+
+		const svg = d3.select(ref.current);
+		svg.selectAll("*").remove();
+
+		const { width: currentWidth, height: currentHeight } = dimensions;
+
+		const baseMargin = 80;
+		const margin = Math.max(baseMargin * (currentWidth / 500), 60);
+		const radius = (Math.min(currentWidth, currentHeight) - margin) / 2;
+
+		if (radius <= 0) return;
+
+		const { chart, arcs, labels } = createPieSlices(svg, data, currentWidth, currentHeight, radius);
+
+		addPieLabels(chart, arcs, labels, data, radius, currentWidth);
+
+		createLegend(svg, data, currentWidth, currentHeight);
+
+		addTitle(svg, title, currentWidth, currentHeight);
+
+	}, [data, title, dimensions, createPieSlices, addPieLabels, createLegend, addTitle]);
+
+	// Responsive
+	useEffect(() => {
+		updateDimensions();
+
+		window.addEventListener('resize', updateDimensions);
+
+		return () => window.removeEventListener('resize', updateDimensions);;
+	}, [updateDimensions]);
+
+	// Renderiar
+	useEffect(() => {
+		renderChart();
+	}, [renderChart]);
 
 	return (
-		<>
-			<svg ref={ref} width={width} height={height} className="m-3 shadow rounded"></svg>
-		</>
+		<div ref={containerRef} className="w-full">
+			<svg 
+				ref={ref} 
+				width={dimensions.width} 
+				height={dimensions.height} 
+				className="m-3 rounded"
+				style={{ maxWidth: '100%', height: 'auto' }}
+			/>
+		</div>
 	);
 };
 

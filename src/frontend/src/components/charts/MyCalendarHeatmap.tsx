@@ -1,71 +1,98 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import * as d3 from "d3";
 import { ICategoryCount } from "../../Interfaces";
 
-
 interface Props {
 	data: ICategoryCount | undefined,
-};
+	cellSize?: number,
+	monthsToShow?: number
+}
 
-const CalendarHeatmap = ({ data }: Props) => {
+const CalendarHeatmap = ({ 
+	data, 
+	cellSize = 30,
+	monthsToShow = 3
+}: Props) => {
 	const ref = useRef<SVGSVGElement | null>(null);
+	const containerRef = useRef<HTMLDivElement | null>(null);
+	const [dimensions, setDimensions] = useState({ width: 800, height: 300 });
+	const [responsiveCellSize, setResponsiveCellSize] = useState(cellSize);
 
-	useEffect(() => {
-		if (!data)
-			return;
-		const svg = d3.select(ref.current);
-		svg.selectAll("*").remove();
+	const updateDimensions = useCallback(() => {
+		if (containerRef.current) {
+			const containerWidth = containerRef.current.offsetWidth;
+			const newWidth = containerWidth;
+			
+			const minCellSize = 10;
+			const maxCellSize = 35;
+			const calculatedCellSize = Math.max(minCellSize, Math.min(maxCellSize, newWidth / (monthsToShow * 8)));
+			
+			const cellPadding = Math.max(2, calculatedCellSize * 0.2);
+			const calendarHeight = 5 * (calculatedCellSize + cellPadding);
+			const newHeight = (calendarHeight + 150);
+			
+			setDimensions({ width: newWidth, height: newHeight });
+			setResponsiveCellSize(calculatedCellSize);
+		}
+	}, [cellSize, monthsToShow]);
 
+	const createCalendarDates = useCallback(() => {
 		const now = new Date();
-		const startDate = d3.timeMonth.offset(now, -1);
+		const startDate = d3.timeMonth.offset(now, -monthsToShow);
 		const endDate = d3.timeMonth.offset(d3.timeMonth.ceil(now), 0);
 		const allDates = d3.timeDays(startDate, endDate);
-
-		const margin = { top: 50, right: 50, bottom: 50, left: 50 };
-		const cellSize = 30;
-		const cellPadding = 8;
-		const legendWidth = 10;
 		const months = d3.timeMonths(startDate, endDate);
-		const calendarHeigth = 5 * (cellSize + cellPadding);
-		const calendarWidth = months.length * (7 * (cellSize + cellPadding)) + legendWidth;
-		const height = calendarHeigth + margin.top + margin.bottom;
-		const width = calendarWidth + margin.left + margin.right;
-		const maxVal = d3.max(Object.values(data)) || 1;
+		
+		return { allDates, months, startDate, endDate };
+	}, [monthsToShow]);
 
-		const color = d3
+	const createColorScale = useCallback((data: ICategoryCount) => {
+		const maxVal = d3.max(Object.values(data)) || 1;
+		return d3
 			.scaleLinear<string>()
 			.domain([0, maxVal])
 			.range(["#deebf7", "#08519c"]);
+	}, []);
 
-		const g = svg
-			.attr("width", width)
-			.attr("height", height)
-			.append("g")
-			.attr("transform", `translate(${margin.left}, ${margin.top})`);
-
+	const renderCalendarMonths = useCallback((
+		g: d3.Selection<SVGGElement, unknown, null, undefined>,
+		months: Date[],
+		allDates: Date[],
+		data: ICategoryCount,
+		color: d3.ScaleLinear<string, string, never>,
+		cellSize: number,
+		cellPadding: number,
+		currentWidth: number
+	) => {
+		const fontSize = Math.max(10, Math.min(20, currentWidth / (monthsToShow * 20)));
+		const dayFontSize = Math.max(8, Math.min(12, cellSize / 3));
+		
 		months.forEach((month, i) => {
 			const monthDates = allDates.filter(d => d.getMonth() === month.getMonth());
 			const xMonth = i * (7 * (cellSize + cellPadding) + 10);
 			const monthGroup = g.append("g").attr("transform", `translate(${xMonth}, 0)`);
 
-			// Mes
 			monthGroup
 				.append("text")
 				.attr("x", (7 * (cellSize + cellPadding)) / 2)
 				.attr("y", -15)
 				.attr("text-anchor", "middle")
-				.attr("font-size", "20px")
+				.attr("font-size", `${fontSize}px`)
 				.attr("font-weight", "bold")
-				.text(d3.timeFormat("%B %Y")(month).toUpperCase());
+				.attr("fill", "white")
+				.text(d3.timeFormat(currentWidth < 600 ? "%b %Y" : "%B %Y")(month).toUpperCase());
 
-			// Días
 			const dayGroup = monthGroup
 				.selectAll("g.day")
 				.data(monthDates)
 				.join("g")
+				.attr("class", "day")
 				.attr("transform", d => {
-					const x = d.getDay() * (cellSize + cellPadding);
-					const y = d3.timeWeek.count(month, d) * (cellSize + cellPadding);
+					const numDay = d.getDay() || 7; // domingo como último día
+					const x = (numDay - 1) * (cellSize + cellPadding);
+					let timeCount = d3.timeWeek.count(month, d);
+					if (numDay == 7) timeCount -= 1;
+					const y = timeCount * (cellSize + cellPadding);
 					return `translate(${x}, ${y})`;
 				});
 
@@ -73,31 +100,78 @@ const CalendarHeatmap = ({ data }: Props) => {
 				.append("rect")
 				.attr("width", cellSize)
 				.attr("height", cellSize)
+				.attr("rx", Math.max(1, cellSize / 10))
+				.attr("ry", Math.max(1, cellSize / 10))
 				.attr("fill", d => {
-					const value = data[(d3.timeFormat("%Y-%m-%d")(d))];
+					const value = data[d3.timeFormat("%Y-%m-%d")(d)];
 					return value !== undefined ? color(value) : "#eee";
-				});
+				})
+				.attr("stroke", "#fff")
+				.attr("stroke-width", 0.5)
+				.style("opacity", 0)
+				.transition()
+				.duration(500)
+				.delay((_, i) => i * 10)
+				.style("opacity", 1);
 
-			dayGroup
-				.append("text")
-				.attr("x", cellSize / 2)
-				.attr("y", cellSize / 2 + 4)
-				.attr("text-anchor", "middle")
-				.attr("font-size", "10px")
-				.attr("fill", "black")
-				.text(d => d3.timeFormat("%d")(d));
+			if (cellSize >= 20) {
+				dayGroup
+					.append("text")
+					.attr("x", cellSize / 2)
+					.attr("y", cellSize / 2 + 4)
+					.attr("text-anchor", "middle")
+					.attr("font-size", `${dayFontSize}px`)
+					.attr("fill", "black")
+					.attr("font-weight", "bold")
+					.text(d => d3.timeFormat("%d")(d))
+					.style("opacity", 0)
+					.transition()
+					.duration(500)
+					.delay((_, i) => i * 10 + 200)
+					.style("opacity", 1);
+			}
 
 			dayGroup
 				.append("title")
 				.text(d => {
 					const dateStr = d3.timeFormat("%Y-%m-%d")(d);
 					const value = data[dateStr] ?? 0;
-					return `${dateStr}: ${value}`;
+					return `${d3.timeFormat("%B %d, %Y")(d)}: ${value}`;
+				});
+
+			dayGroup
+				.style("cursor", "pointer")
+				.on("mouseover", function() {
+					d3.select(this).select("rect")
+						.transition()
+						.duration(200)
+						.attr("stroke-width", 2)
+						.attr("stroke", "#333");
+				})
+				.on("mouseout", function() {
+					d3.select(this).select("rect")
+						.transition()
+						.duration(200)
+						.attr("stroke-width", 0.5)
+						.attr("stroke", "#fff");
 				});
 		});
+	}, [monthsToShow]);
+
+	const createLegend = useCallback((
+		svg: d3.Selection<SVGSVGElement | null, unknown, null, undefined>,
+		color: d3.ScaleLinear<string, string, never>,
+		currentWidth: number,
+		currentHeight: number,
+		calendarHeight: number,
+		margin: { top: number; right: number; bottom: number; left: number }
+	) => {
+		if (currentWidth < 500) return; // No mostrar leyenda en dispositivos pequeños
+
+		const legendWidth = Math.max(8, currentWidth / 80);
+		const legendHeight = Math.min(calendarHeight, 150);
 
 		const defs = svg.append("defs");
-
 		const linearGradient = defs.append("linearGradient")
 			.attr("id", "legend-gradient")
 			.attr("x1", "0%")
@@ -115,31 +189,88 @@ const CalendarHeatmap = ({ data }: Props) => {
 		}
 
 		const legendG = svg.append("g")
-			.attr("transform", `translate(${width - margin.right + 10}, ${margin.top})`);
+			.attr("transform", `translate(${currentWidth - margin.right + 10}, ${margin.top})`);
 
 		legendG.append("rect")
 			.attr("width", legendWidth)
-			.attr("height", calendarHeigth)
+			.attr("height", legendHeight)
 			.style("fill", "url(#legend-gradient)")
-			.attr("stroke", "#ccc");
+			.attr("stroke", "#ccc")
+			.attr("rx", 2)
+			.attr("ry", 2);
 
 		const legendScale = d3.scaleLinear()
 			.domain(legendDomain)
-			.range([calendarHeigth, 0]);
+			.range([legendHeight, 0]);
 
 		const legendAxis = d3.axisRight(legendScale)
-			.ticks(6)
+			.ticks(Math.min(6, Math.floor(legendHeight / 30)))
 			.tickFormat(d3.format("d"));
 
 		legendG.append("g")
 			.attr("transform", `translate(${legendWidth}, 0)`)
-			.call(legendAxis);
-	}, [data]);
+			.call(legendAxis)
+			.selectAll("text")
+			.attr("fill", "white")
+			.attr("font-size", `${Math.max(10, currentWidth / 80)}px`);
+
+		legendG.selectAll(".domain, .tick line")
+			.attr("stroke", "white");
+	}, []);
+
+	const renderCalendar = useCallback(() => {
+		if (!data) return;
+
+		const svg = d3.select(ref.current);
+		svg.selectAll("*").remove();
+
+		const { width: currentWidth, height: currentHeight } = dimensions;
+		const cellPadding = Math.max(2, responsiveCellSize * 0.2);
+		
+		const margin = {
+			top: Math.max(60, currentHeight * 0.2),
+			right: currentWidth < 500 ? 20 : 80,
+			bottom: Math.max(30, currentHeight * 0.1),
+			left: Math.max(20, currentWidth * 0.05)
+		};
+
+		const calendarHeight = 5 * (responsiveCellSize + cellPadding);
+		const { allDates, months } = createCalendarDates();
+		const color = createColorScale(data);
+
+		svg.attr("width", currentWidth).attr("height", currentHeight);
+
+		const g = svg
+			.append("g")
+			.attr("transform", `translate(${margin.left}, ${margin.top})`);
+
+		renderCalendarMonths(g, months, allDates, data, color, responsiveCellSize, cellPadding, currentWidth);
+
+		createLegend(svg, color, currentWidth, currentHeight, calendarHeight, margin);
+
+	}, [data, dimensions, responsiveCellSize, createCalendarDates, createColorScale, renderCalendarMonths, createLegend]);
+
+	useEffect(() => {
+		updateDimensions();
+
+		window.addEventListener('resize', updateDimensions);
+
+		return () => window.removeEventListener('resize', updateDimensions);;
+	}, [updateDimensions]);
+
+	useEffect(() => {
+		renderCalendar();
+	}, [renderCalendar]);
 
 	return (
-		<>
-			<svg ref={ref} width="100%" className="my-3 shadow rounded"></svg>
-		</>
+		<div ref={containerRef} className="w-full">
+			<svg 
+				ref={ref} 
+				width="100%" 
+				className="my-3 mx-auto rounded"
+				style={{ maxWidth: '100%', height: 'auto' }}
+			/>
+		</div>
 	);
 };
 

@@ -1,6 +1,6 @@
 import * as d3 from "d3";
 import { ICategoryCount } from "../../Interfaces";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { FeatureCollection, Geometry } from "geojson";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMinus, faPlus, faRotateRight } from "@fortawesome/free-solid-svg-icons";
@@ -14,13 +14,37 @@ interface Props {
 	height?: number,
 }
 
-const SpainChart = ({ data, title, footer = "", width = 500, height = 400 }: Props) => {
+const SpainChart = ({ data, title, footer = "", width, height }: Props) => {
 	const [geoJson, setGeoJson] = useState<FeatureCollection<Geometry> | null>(null);
+	const [dimensions, setDimensions] = useState({ width: width || 500, height: height || 400 });
+	const containerRef = useRef<HTMLDivElement | null>(null);
 	const ref = useRef<SVGSVGElement | null>(null);
 	const zoomRef = useRef<d3.ZoomBehavior<SVGSVGElement, unknown>>(undefined);
 	const svgRef = useRef<d3.Selection<SVGSVGElement, unknown, null, undefined>>(undefined);
 
+	const calculateDimensions = useCallback(() => {
+		if (!containerRef.current) return;
 
+		const container = containerRef.current.parentElement;
+		if (!container) return;
+
+		const containerWidth = container.getBoundingClientRect().width;
+		const padding = 24;
+
+		if (width && height) {
+			setDimensions({ width, height });
+			return;
+		}
+
+		const availableWidth = Math.max(320, containerWidth - padding);
+		const aspectRatio = 0.8;
+		const newWidth = Math.min(availableWidth, 800);
+		const newHeight = Math.max(300, newWidth * aspectRatio);
+
+		setDimensions({ width: newWidth, height: newHeight });
+	}, [width, height]);
+
+	// Cargar geojson
 	useEffect(() => {
 		fetch("/spain-provinces.geojson")
 			.then(response => response.json())
@@ -29,12 +53,30 @@ const SpainChart = ({ data, title, footer = "", width = 500, height = 400 }: Pro
 	}, []);
 
 	useEffect(() => {
+		calculateDimensions();
+
+		window.addEventListener('resize', calculateDimensions);
+		return () => window.removeEventListener('resize', calculateDimensions);
+	}, [calculateDimensions]);
+
+	useEffect(() => {
 		if (!data || !geoJson || !ref.current)
 			return;
 
-		const margin = { top: 60, right: 50, bottom: 10, left: 50 };
-		const innerWidth = width - margin.left - margin.right;
-		const innerHeight = height - margin.top - margin.bottom;
+		const currentWidth = dimensions.width;
+		const currentHeight = dimensions.height;
+
+		const baseMargin = { top: 60, right: 50, bottom: 10, left: 50 };
+		const scaleFactor = Math.min(currentWidth / 500, 1);
+		const margin = {
+			top: baseMargin.top * scaleFactor,
+			right: baseMargin.right * scaleFactor,
+			bottom: baseMargin.bottom * scaleFactor,
+			left: baseMargin.left * scaleFactor
+		};
+
+		const innerWidth = currentWidth - margin.left - margin.right;
+		const innerHeight = currentHeight - margin.top - margin.bottom;
 
 		const svg = d3.select(ref.current);
 		svgRef.current = svg;
@@ -47,7 +89,7 @@ const SpainChart = ({ data, title, footer = "", width = 500, height = 400 }: Pro
 		zoomRef.current = zoom;
 		svg.call(zoom);
 
-		// gWrap to keep transformation when zoom refresh
+		// gWrap para mantener transformación en reset de zoom
 		const gWrap = svg.append("g")
 			.attr("transform", `translate(${margin.left}, ${margin.top})`);
 		const g = gWrap.append("g");
@@ -71,7 +113,7 @@ const SpainChart = ({ data, title, footer = "", width = 500, height = 400 }: Pro
 			.join("path")
 			.attr("d", path as any)
 			.attr("stroke", "#fff")
-			.attr("stroke-width", 0.5)
+			.attr("stroke-width", 0.5 * scaleFactor)
 			.attr("fill", d => {
 				const name = d.properties?.name || d.properties?.NAME_1 || "";
 				const value = data[name];
@@ -84,28 +126,19 @@ const SpainChart = ({ data, title, footer = "", width = 500, height = 400 }: Pro
 				return `${name}: ${value ?? 0}`;
 			});
 
-		// Title
+		const titleFontSize = Math.max(12, 16 * scaleFactor);
 		svg.append("text")
-			.attr("x", width / 2)
-			.attr("y", 30)
+			.attr("x", currentWidth / 2)
+			.attr("y", 30 * scaleFactor)
 			.attr("text-anchor", "middle")
-			.attr("font-size", "16px")
+			.attr("font-size", `${titleFontSize}px`)
 			.attr("font-weight", "bold")
+			.attr("fill", "white")
 			.text(title);
 
-		// Footer
-		svg.append("text")
-			.attr("x", width / 2)
-			.attr("y", height - 20)
-			.attr("text-anchor", "middle")
-			.attr("font-size", "12px")
-			.attr("fill", "#555")
-			.text(footer);
-
-		// Legend
-		const legendHeight = 300;
-		const legendWidth = 12;
-		const legendMargin = 10;
+		const legendHeight = Math.min(300, currentHeight * 0.6);
+		const legendWidth = Math.max(8, 12 * scaleFactor);
+		const legendMargin = 10 * scaleFactor;
 
 		const defs = svg.append("defs");
 
@@ -126,7 +159,7 @@ const SpainChart = ({ data, title, footer = "", width = 500, height = 400 }: Pro
 		}
 
 		const legendG = svg.append("g")
-			.attr("transform", `translate(${width - margin.right + legendMargin}, ${margin.top})`);
+			.attr("transform", `translate(${currentWidth - margin.right + legendMargin}, ${margin.top})`);
 
 		legendG.append("rect")
 			.attr("width", legendWidth)
@@ -138,14 +171,18 @@ const SpainChart = ({ data, title, footer = "", width = 500, height = 400 }: Pro
 			.domain(legendDomain)
 			.range([legendHeight, 0]);
 
+		const legendTicks = Math.min(6, Math.max(3, Math.floor(legendHeight / 50)));
 		const legendAxis = d3.axisRight(legendScale)
-			.ticks(6)
+			.ticks(legendTicks)
 			.tickFormat(d3.format("d"));
 
 		legendG.append("g")
 			.attr("transform", `translate(${legendWidth}, 0)`)
-			.call(legendAxis);
-	}, [data, title, footer, width, height, geoJson]);
+			.call(legendAxis)
+			.selectAll("text")
+			.style("font-size", `${Math.max(8, 10 * scaleFactor)}px`);
+
+	}, [data, title, footer, dimensions, geoJson]);
 
 	const handleZoomIn = () => {
 		if (svgRef.current && zoomRef.current) {
@@ -166,8 +203,18 @@ const SpainChart = ({ data, title, footer = "", width = 500, height = 400 }: Pro
 	};
 
 	return (
-		<div className="m-3 shadow rounded" style={{ width: width}}>
-			<svg ref={ref} width={width} height={height} className="all-scroll-pointer"></svg>
+		<div 
+			ref={containerRef}
+			className="m-3 mx-auto rounded" 
+			style={{ width: dimensions.width, maxWidth: '100%' }}
+		>
+			<svg 
+				ref={ref} 
+				width={dimensions.width} 
+				height={dimensions.height} 
+				className="all-scroll-pointer"
+				style={{ width: '100%', height: 'auto' }}
+			/>
 			<div className="text-center pb-2">
 				<button onClick={handleZoomIn} className="bg-white dark-hover rounded-circle mx-2">
 					<FontAwesomeIcon icon={faPlus} />

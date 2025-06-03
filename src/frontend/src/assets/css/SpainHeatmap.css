@@ -2,7 +2,12 @@
 	cursor: all-scroll;
 }
 
+.dark-hover {
+	border: 1px solid black;
+}
+
 .dark-hover:hover {
+	border: 1px solid white;
 	background-color: black !important;
 	color: white;
 }

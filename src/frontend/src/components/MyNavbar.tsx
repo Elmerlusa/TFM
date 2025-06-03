@@ -13,7 +13,7 @@ const MyNavbar = () => {
 
 	return (
 		<>
-			<Navbar expand="sm" bg="dark" variant="dark" className="px-4">
+			<Navbar expand="lg" bg="dark" variant="dark" className="px-4">
 				<Container fluid>
 					<Navbar.Brand className="fs-2 fw-bold mx-2">
 						<FontAwesomeIcon icon={faLock} className="me-2"></FontAwesomeIcon>
@@ -24,7 +24,7 @@ const MyNavbar = () => {
 						<Nav className="ms-auto">
 							{links.map(link => (
 								<NavLink key={link.path} to={link.path} 
-									className="p-2 link-underline link-underline-opacity-0 text-white rounded mx-1 navlink">
+									className="p-2 link-underline link-underline-opacity-0 text-white rounded m-1 navlink">
 									<FontAwesomeIcon icon={link.icon} className="me-2" ></FontAwesomeIcon>
 									{link.text.toUpperCase()}
 								</NavLink>
