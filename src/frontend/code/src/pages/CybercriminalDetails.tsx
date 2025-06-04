@@ -11,7 +11,7 @@ const CybercriminalDetails = () => {
 	const { name } = useParams();
 
 	useEffect(() => {
-		fetch(`/ciberdelincuentes/${name}`)
+		fetch(`/api/ciberdelincuentes/${name}`)
 			.then(response => response.json())
 			.then(data => {
 				const parsedData = {

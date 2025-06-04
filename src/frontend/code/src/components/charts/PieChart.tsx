@@ -36,7 +36,7 @@ const PieChart = ({
 	) => {
 		const color = d3.scaleOrdinal<string>()
 			.domain(Object.keys(data))
-			.range(d3.schemeBlues[Object.values(data).length <= 9 ? Object.values(data).length : 9]);
+			.range(d3.schemeSet1);
 
 		const pie = d3.pie<number>()
 			.value(d => d)
@@ -69,50 +69,6 @@ const PieChart = ({
 					return arcGenerator(i(t))!;
 				};
 			});
-
-		return { chart, arcs, labels };
-	}, []);
-
-	const addPieLabels = useCallback((
-		chart: d3.Selection<SVGGElement, unknown, null, undefined>,
-		arcs: d3.PieArcDatum<number>[],
-		labels: string[],
-		data: ICategoryCount,
-		radius: number,
-		currentWidth: number
-	) => {
-		const labelArc = d3.arc<d3.PieArcDatum<number>>()
-			.innerRadius(radius * 0.6)
-			.outerRadius(radius * 0.6);
-
-		const total = d3.sum(Object.values(data));
-		const fontSize = Math.max(10, 12 * (currentWidth / 500));
-
-		chart.selectAll("text")
-			.data(arcs)
-			.join("text")
-			.attr("transform", (d) => `translate(${labelArc.centroid(d)})`)
-			.attr("text-anchor", "middle")
-			.attr("font-size", `${fontSize}px`)
-			.attr("fill", "black")
-			.text((d, i) => {
-				const percent = 100 * d.value / total;
-				const labelText = labels[i];
-				
-				if (currentWidth < 400) {
-					return percent > 5 ? `${percent.toFixed(0)}%` : "";
-				} else if (currentWidth < 600) {
-					const shortLabel = labelText.length > 8 ? labelText.slice(0, 8) + "..." : labelText;
-					return `${shortLabel} (${percent.toFixed(1)}%)`;
-				} else {
-					return `${labelText} (${percent.toFixed(2)}%)`;
-				}
-			})
-			.style("opacity", 0)
-			.transition()
-			.delay(500)
-			.duration(500)
-			.style("opacity", 1);
 	}, []);
 
 	const createLegend = useCallback((
@@ -121,15 +77,13 @@ const PieChart = ({
 		currentWidth: number,
 		currentHeight: number
 	) => {
-		if (currentWidth < 600) return; // No mostrar leyenda en pantallas pequeñas
-
 		const labels = Object.keys(data);
 		const values = Object.values(data);
 		const total = d3.sum(values);
 		
 		const color = d3.scaleOrdinal<string>()
 			.domain(labels)
-			.range(d3.schemeBlues[labels.length <= 9 ? labels.length : 9]);
+			.range(d3.schemeSet1);
 
 		const legend = svg.append("g")
 			.attr("class", "legend")
@@ -190,15 +144,13 @@ const PieChart = ({
 
 		if (radius <= 0) return;
 
-		const { chart, arcs, labels } = createPieSlices(svg, data, currentWidth, currentHeight, radius);
-
-		addPieLabels(chart, arcs, labels, data, radius, currentWidth);
+		createPieSlices(svg, data, currentWidth, currentHeight, radius);
 
 		createLegend(svg, data, currentWidth, currentHeight);
 
 		addTitle(svg, title, currentWidth, currentHeight);
 
-	}, [data, title, dimensions, createPieSlices, addPieLabels, createLegend, addTitle]);
+	}, [data, title, dimensions, createLegend, addTitle]);
 
 	// Responsive
 	useEffect(() => {
@@ -209,7 +161,7 @@ const PieChart = ({
 		return () => window.removeEventListener('resize', updateDimensions);;
 	}, [updateDimensions]);
 
-	// Renderiar
+	// Renderizar
 	useEffect(() => {
 		renderChart();
 	}, [renderChart]);

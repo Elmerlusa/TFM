@@ -11,7 +11,7 @@ const CyberattackDetails = () => {
 	const { id } = useParams();
 
 	useEffect(() => {
-		fetch('/ciberataques/' + id)
+		fetch('/api/ciberataques/' + id)
 			.then(response => response.json())
 			.then(data => {
 				const parsedData = {

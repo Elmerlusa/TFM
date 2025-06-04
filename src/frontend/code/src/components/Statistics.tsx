@@ -43,25 +43,19 @@ const Statistics = ({ lastAttackAt, stats }: Props) => {
 			</Row>
 			<Row>
 				<Col xl={6} className="text-center">
-					<BarChart data={stats?.attacksByTarget} title="Ciberataques según su objetivo" />
+					<BarChart data={stats?.attacksByTarget} title="Ciberataques según su objetivo" horizontal />
 				</Col>
 				<Col xl={6} className="text-center">
-					<BarChart data={stats?.attacksBySector} title="Ciberataques según el sector" horizontal={true} />
+					<PieChart data={stats?.attacksByType} title="Distribución de ciberataques según su tipo" />
 				</Col>
 			</Row>
 			<Row>
-				{
-					stats?.attacksByTarget &&
-					<Col xl={6}  className="text-center">
-						<PieChart data={stats?.attacksByTarget} title="Distribución de ciberataques según su tipo" />
-					</Col>
-				}
-				{
-					stats?.attacksByRegion &&
-					<Col xl={6}  className="text-center">
-						<SpainChart data={stats?.attacksByRegion} title="Ciberataques por provincia" />
-					</Col>
-				}
+				<Col xl={6} className="text-center">
+					<BarChart data={stats?.attacksBySector} title="Ciberataquess según el sector" horizontal />
+				</Col>
+				<Col xl={6} className="text-center">
+					<SpainChart data={stats?.attacksByRegion} title="Ciberataques por provincia" />
+				</Col>
 			</Row>
 		</>
 	);

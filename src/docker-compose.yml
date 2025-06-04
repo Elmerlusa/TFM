@@ -14,9 +14,9 @@ services:
     restart: always
 
   backend:
-    container_name: cyberattacks_backend
+    container_name: backend
     build: ./backend/
-    image: cyberattacks_backend
+    image: backend
     env_file:
       - ./.env
     ports:
@@ -25,6 +25,18 @@ services:
       - tfm_network
     depends_on:
       - database
+    restart: always
+
+  frontend:
+    container_name: frontend
+    build: ./frontend/
+    image: frontend
+    ports:
+      - 3000:80
+    networks:
+      - tfm_network
+    depends_on:
+      - backend
     restart: always
 
 networks:

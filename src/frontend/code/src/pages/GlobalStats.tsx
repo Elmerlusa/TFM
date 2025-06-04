@@ -10,57 +10,48 @@ const GlobalStats = () => {
 	const [stats, setStats] = useState<IGlobalStats>();
 
 	useEffect(() => {
-		fetch('/estadisticas')
+		fetch('/api/estadisticas')
 			.then(response => response.json())
 			.then(setStats)
 			.catch(e => alert(e));
 	}, []);
 
-	if (!stats?.attacksByDate)
+	if (!stats)
 		return <></>;
 
 	const today = new Date();
 	const endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0);
 	const startDate = new Date(today.getFullYear(), today.getMonth(), 1);
 	startDate.setMonth(today.getMonth() - 3);
-	const parsedData = Object.entries(stats?.attacksByDate).map(e => {
-		return {date: e[0], count: e[1]}
+	const parsedData = Object.entries(stats.attacksByDate).map(e => {
+		return { date: e[0], count: e[1] }
 	});
 
 	return (
 		<Container className="bg-dark rounded">
 			<Row>
-				<MyCalendarHeatmap data={stats?.attacksByDate} />
+				<MyCalendarHeatmap data={stats.attacksByDate} />
 			</Row>
 			<Row className="my-2">
 				<Col xl={6} className="text-center">
-					<BarChart data={stats?.attacksByTarget} title="Ciberataques según su objetivo" horizontal={true} />
+					<BarChart data={stats.attacksByTarget} title="Ciberataques por objetivo" horizontal />
 				</Col>
 				<Col xl={6} className="text-center">
-					<BarChart data={stats?.attacksBySector} title="Ciberataques según el sector" horizontal={true} />
+					<BarChart data={stats.attacksByGroup} title="Ciberataques por atacante" horizontal />
 				</Col>
 			</Row>
 			<Row>
-				{
-					stats?.attacksByTarget &&
-					<Col xl={6} className="text-center">
-						<PieChart data={stats?.attacksByTarget} title="Distribución de ciberataques según su tipo" />
-					</Col>
-				}
-				{
-					stats?.attacksByGroup &&
-					<Col xl={6} className="text-center">
-						<PieChart data={stats?.attacksByGroup} title="Distribución de ciberataques según su atacante" />
-					</Col>
-				}
+				<Col xl={6} className="text-center">
+					<BarChart data={stats.attacksBySector} title="Ciberataques por sector" horizontal />
+				</Col>
+				<Col xl={6} className="text-center">
+					<PieChart data={stats.attacksByType} title="Distribución de ciberataques según su tipo" />
+				</Col>
 			</Row>
 			<Row className="my-2">
-				{
-					stats?.attacksByRegion &&
-					<Col className="text-center">
-						<SpainChart data={stats?.attacksByRegion} title="Ciberataques por provincia" />
-					</Col>
-				}
+				<Col className="text-center">
+					<SpainChart data={stats.attacksByRegion} title="Ciberataques por provincia" />
+				</Col>
 			</Row>
 		</Container>
 	);

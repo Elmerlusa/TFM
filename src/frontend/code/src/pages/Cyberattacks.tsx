@@ -1,34 +1,34 @@
+import { ICyberattackAbstract } from "../Interfaces";
 import { useEffect, useState } from "react";
 import { Container, Row, Spinner } from "react-bootstrap";
 import { Outlet, useParams } from "react-router";
-import { ICybercriminalAbstract } from "../Interfaces";
-import CybercriminalCard from "../components/CybercriminalCard";
+import CyberattackCard from "../components/CyberattackCard";
 
-const Cybercriminals = () => {
-	const [cybercriminals, setCybercriminals] = useState<ICybercriminalAbstract[]>([]);
-	const { name } = useParams();
+const Cyberattacks = () => {
+	const [cyberattacks, setCyberattacks] = useState<ICyberattackAbstract[]>([]);
+	const { id } = useParams();
 
 	useEffect(() => {
-		if (name)
+		if (id)
 			return;
-		fetch('/ciberdelincuentes')
+		fetch('/api/ciberataques')
 			.then(response => response.json())
 			.then(data => {
 				const parsedData = [...data].map(d => {
 					return {
 						...d,
-						lastAttackAt: new Date(d.lastAttackAt)
+						detectedAt: new Date(d.detectedAt)
 					};
 				});
 
-				setCybercriminals(parsedData);
+				setCyberattacks(parsedData);
 			})
 			.catch(() => alert('ERROR'));
-	}, [name]);
+	}, [id]);
 
-	if (name)
+	if (id)
 		return <Outlet />;
-	if (!cybercriminals) {
+	if (!cyberattacks) {
 		return (
 			<Container>
 				<Row>
@@ -39,9 +39,9 @@ const Cybercriminals = () => {
 	}
 	return (
 		<Container className="card-animate">
-			{cybercriminals.map(c => <CybercriminalCard key={c.name} cybercriminal={c} />)}
+			{cyberattacks.map(c => <CyberattackCard cyberattack={c} key={c.id}/>)}
 		</Container>
 	);
 };
 
-export default Cybercriminals;
+export default Cyberattacks;
