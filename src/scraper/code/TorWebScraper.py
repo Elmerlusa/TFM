@@ -2,28 +2,32 @@ import time
 import random
 import json
 import logging
+import os
+import shutil
+import socket
 from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.action_chains import ActionChains
 from fake_useragent import UserAgent
 from stem import Signal
 from stem.control import Controller
 
 class TorWebScraper:
-    def __init__(self, tor_proxy_port=9050, tor_control_port=9051, 
-                 chromedriver_path=r'C:\webdrivers\chrome\chromedriver.exe'):
+    def __init__(self, tor_proxy_host='tor-proxy', tor_proxy_port=9050, tor_control_port=9051, tor_control_password='scraper'):
+        self.tor_proxy_host = tor_proxy_host
         self.tor_proxy_port = tor_proxy_port
         self.tor_control_prot = tor_control_port
-        self.chromedriver_path = chromedriver_path
+        self.tor_control_password = tor_control_password
         self.ua = UserAgent()
         self.driver = None
         logging.info(
             'TorWebScraper(' \
+            f'tor_proxy_host={tor_proxy_host}, ' \
             f'tor_proxy_port={tor_proxy_port}, ' \
             f'tor_control_port={tor_control_port}, ' \
-            f'chromedriver_path={chromedriver_path}' \
             ') created'
         )
 
@@ -31,7 +35,7 @@ class TorWebScraper:
         chrome_options = Options()
 
         # TOR proxy configuration
-        chrome_options.add_argument(f'--proxy-server=socks5://127.0.0.1:{self.tor_proxy_port}')
+        chrome_options.add_argument(f'--proxy-server=socks5://{self.tor_proxy_host}:{self.tor_proxy_port}')
         chrome_options.add_argument('--proxy-bypass-list=<-loopback>')
 
         # Anti-bot detection techniques
@@ -54,8 +58,9 @@ class TorWebScraper:
         chrome_options.add_argument('--disable-plugins')
         chrome_options.add_argument('--disable-java')
         chrome_options.add_argument('--disable-web-security')
-        # chrome_options.add_argument('--no-sandbox')
+        chrome_options.add_argument('--no-sandbox')
         chrome_options.add_argument('--disable-dev-shm-usage')
+        chrome_options.add_argument('--headless=new')
 
         # Randomize window size
         window_sizes = [
@@ -65,28 +70,33 @@ class TorWebScraper:
         width, height = random.choice(window_sizes)
         chrome_options.add_argument(f'--window-size={width},{height}')
 
-        service = Service(executable_path=self.chromedriver_path)
-        self.driver = webdriver.Chrome(service=service, options=chrome_options)
+        # Temporary user data dir
+        self.user_data_dir = '/tmp/chrome_user_data'
+        chrome_options.add_argument(f'--user-data-dir={self.user_data_dir}')
+        if os.path.exists(self.user_data_dir):
+            shutil.rmtree(self.user_data_dir, ignore_errors=True)
+
+        self.driver = webdriver.Chrome(options=chrome_options)
         self.check_current_ip()
 
     def check_current_ip(self) -> None:
         logging.info('Checking current IP...')
-        try:
-            self.driver.get('http://httpbin.org/ip')
+        self.driver.get('http://httpbin.org/ip')
 
-            ip_element = self.driver.find_element(By.TAG_NAME, 'pre')
-            ip_info = json.loads(ip_element.text)
-            logging.info(f'Current IP {ip_info['origin']}')
-        except Exception as e:
-            logging.warning('Error checking current IP: {e}')
+        ip_element = WebDriverWait(self.driver, 10).until(
+            EC.visibility_of_element_located((By.TAG_NAME, 'pre'))
+        )
+        ip_info = json.loads(ip_element.text)
+        logging.info(f'Current IP {ip_info["origin"]}')
 
     def rotate_tor_identity(self) -> None:
         try:
             logging.info('Rotating TOR identity...')
-            with Controller.from_port(port=self.tor_control_prot) as controller:
-                controller.authenticate()
+            ip = socket.gethostbyname(self.tor_proxy_host)
+            with Controller.from_port(address=ip, port=self.tor_control_prot) as controller:
+                controller.authenticate(password=self.tor_control_password)
                 controller.signal(Signal.NEWNYM)
-                time.sleep(5) # wait for new tor circuit
+                time.sleep(10) # wait for new tor circuit
                 self.close()
                 self.setup_chrome_with_tor()
         except Exception as e:
@@ -117,4 +127,6 @@ class TorWebScraper:
     def close(self) -> None:
         if self.driver:
             self.driver.quit()
+        if os.path.exists(self.user_data_dir):
+            shutil.rmtree(self.user_data_dir, ignore_errors=True)
         logging.info("TorWebScraper's driver closed")

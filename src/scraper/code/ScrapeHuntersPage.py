@@ -13,23 +13,28 @@ class ScrapeHuntersPage:
 		logging.info('ScrapeHuntersPage() created')
 
 	def scrape(self):
-		url = 'hunters55rdxciehoqzwv7vgyv6nt37tbwax2reroyzxhou7my5ejyid.onion'
+		# url = 'hunters55rdxciehoqzwv7vgyv6nt37tbwax2reroyzxhou7my5ejyid.onion/'
+		url = 'http://wges3aohuplu6he5tv4pn7sg2qaummlokimim6oaauqo2l7lbx4ufyyd.onion/'
 		self.driver.get(url)
 
-		logging.info('Waiting for scrollable content to render...')
-		WebDriverWait(self.driver, 10).until(
-			EC.presence_of_element_located((By.TAG_NAME, 'perfect-scrollbar'))
-		)
-		scrollable = self.driver.find_element(By.TAG_NAME, 'perfect-scrollbar')
-
 		time.sleep(10)
+
+		# self.driver.save_screenshot('/images/screenshot.png')
+
+		# logging.info('Waiting for scrollable content to render...')
+		# WebDriverWait(self.driver, 10).until(
+		# 	EC.presence_of_element_located((By.TAG_NAME, 'perfect-scrollbar'))
+		# )
+		# scrollable = self.driver.find_element(By.TAG_NAME, 'perfect-scrollbar')
+
+		# time.sleep(10)
 		
-		# Scroll to load all the content
-		logging.info('Scrolling to load all cyberattacks...')
-		# TODO
+		# # Scroll to load all the content
+		# logging.info('Scrolling to load all cyberattacks...')
+		# # TODO
 
-		cyberattacks = self.driver.find_elements(
-			By.CSS_SELECTOR, 'app-company-list div.wrapper.ng-star-inserted'
-		)
+		# cyberattacks = self.driver.find_elements(
+		# 	By.CSS_SELECTOR, 'app-company-list div.wrapper.ng-star-inserted'
+		# )
 
-		logging.info(f'Number of spanish cyberattacks found {1}')
+		# logging.info(f'Number of spanish cyberattacks found {1}')

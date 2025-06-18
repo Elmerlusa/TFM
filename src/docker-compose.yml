@@ -12,6 +12,11 @@ services:
     networks:
       - tfm_network
     restart: always
+    # healthcheck:
+    #   test: ["CMD", "sh", "-c", "nc -z localhost 27017"]
+    #   interval: 10s
+    #   timeout: 5s
+    #   retries: 5
 
   backend:
     container_name: backend
@@ -24,8 +29,14 @@ services:
     networks:
       - tfm_network
     depends_on:
-      - database
+      - database #database:
+        # condition: service_healthy
     restart: always
+    # healthcheck:
+    #   test: ["CMD", "curl", "-f", "http://localhost:8080/"]
+    #   interval: 10s
+    #   timeout: 5s
+    #   retries: 5
 
   frontend:
     container_name: frontend
@@ -36,7 +47,38 @@ services:
     networks:
       - tfm_network
     depends_on:
-      - backend
+      - backend #backend:
+        # condition: service_healthy
+    restart: always
+  
+  tor-proxy:
+    image: dperson/torproxy
+    container_name: tor-proxy
+    volumes:
+      - ./tor/torrc:/etc/tor/torrc
+    networks:
+      - tfm_network
+    restart: always
+    # healthcheck:
+    #   test: ["CMD", "sh", "-c", "nc -z localhost 9050"]
+    #   interval: 10s
+    #   timeout: 5s
+    #   retries: 5
+
+  scraper:
+    container_name: scraper
+    build: ./scraper/
+    image: scraper
+    volumes:
+      - ./.volumes/.scraper:/app/data
+      - ./scraper/code/:/app/
+    networks:
+      - tfm_network
+    depends_on:
+      - database #database:
+        # condition: service_healthy
+      - tor-proxy #tor-proxy:
+        # condition: service_healthy
     restart: always
 
 networks:
