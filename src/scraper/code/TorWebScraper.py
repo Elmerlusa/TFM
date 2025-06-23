@@ -16,8 +16,9 @@ from stem import Signal
 from stem.control import Controller
 
 class TorWebScraper:
-    def __init__(self, tor_proxy_host='tor-proxy', tor_proxy_port=9050, tor_control_port=9051, tor_control_password='scraper'):
+    def __init__(self, tor_proxy_host='localhost', tor_proxy_port=9050, tor_control_port=9051, tor_control_password='scraper'):
         self.tor_proxy_host = tor_proxy_host
+        self.ip = socket.gethostbyname(tor_proxy_host)
         self.tor_proxy_port = tor_proxy_port
         self.tor_control_prot = tor_control_port
         self.tor_control_password = tor_control_password
@@ -35,7 +36,7 @@ class TorWebScraper:
         chrome_options = Options()
 
         # TOR proxy configuration
-        chrome_options.add_argument(f'--proxy-server=socks5://{self.tor_proxy_host}:{self.tor_proxy_port}')
+        chrome_options.add_argument(f'--proxy-server=socks5://{self.ip}:{self.tor_proxy_port}')
         chrome_options.add_argument('--proxy-bypass-list=<-loopback>')
 
         # Anti-bot detection techniques
@@ -60,7 +61,9 @@ class TorWebScraper:
         chrome_options.add_argument('--disable-web-security')
         chrome_options.add_argument('--no-sandbox')
         chrome_options.add_argument('--disable-dev-shm-usage')
-        chrome_options.add_argument('--headless=new')
+        # chrome_options.add_argument('--headless=new')
+
+        chrome_options.add_argument("--ignore-certificate-errors")
 
         # Randomize window size
         window_sizes = [
@@ -77,7 +80,6 @@ class TorWebScraper:
             shutil.rmtree(self.user_data_dir, ignore_errors=True)
 
         self.driver = webdriver.Chrome(options=chrome_options)
-        self.check_current_ip()
 
     def check_current_ip(self) -> None:
         logging.info('Checking current IP...')
@@ -92,13 +94,10 @@ class TorWebScraper:
     def rotate_tor_identity(self) -> None:
         try:
             logging.info('Rotating TOR identity...')
-            ip = socket.gethostbyname(self.tor_proxy_host)
-            with Controller.from_port(address=ip, port=self.tor_control_prot) as controller:
+            with Controller.from_port(address=self.ip, port=self.tor_control_prot) as controller:
                 controller.authenticate(password=self.tor_control_password)
                 controller.signal(Signal.NEWNYM)
                 time.sleep(10) # wait for new tor circuit
-                self.close()
-                self.setup_chrome_with_tor()
         except Exception as e:
             logging.warning(f'Error rotating TOR identity: {e}')
     
