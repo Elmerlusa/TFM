@@ -71,7 +71,6 @@ services:
     image: scraper
     volumes:
       - ./.volumes/.scraper:/app/data
-      - ./scraper/code/:/app/
     networks:
       - tfm_network
     depends_on:

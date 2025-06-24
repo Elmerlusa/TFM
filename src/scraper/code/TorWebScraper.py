@@ -16,7 +16,7 @@ from stem import Signal
 from stem.control import Controller
 
 class TorWebScraper:
-    def __init__(self, tor_proxy_host='localhost', tor_proxy_port=9050, tor_control_port=9051, tor_control_password='scraper'):
+    def __init__(self, tor_proxy_host='tor-proxy', tor_proxy_port=9050, tor_control_port=9051, tor_control_password='scraper'):
         self.tor_proxy_host = tor_proxy_host
         self.ip = socket.gethostbyname(tor_proxy_host)
         self.tor_proxy_port = tor_proxy_port
@@ -61,7 +61,7 @@ class TorWebScraper:
         chrome_options.add_argument('--disable-web-security')
         chrome_options.add_argument('--no-sandbox')
         chrome_options.add_argument('--disable-dev-shm-usage')
-        # chrome_options.add_argument('--headless=new')
+        chrome_options.add_argument('--headless=new')
 
         chrome_options.add_argument("--ignore-certificate-errors")
 
