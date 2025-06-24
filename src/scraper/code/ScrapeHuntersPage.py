@@ -1,6 +1,7 @@
 import logging
 import time
 import json
+from datetime import date
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -37,7 +38,7 @@ class ScrapeHuntersPage:
 		cyberattacks = scrollable.find_elements(
 			By.CSS_SELECTOR, 'app-company-list-item'
 		)
-
+		
 		logging.info('Checking cyberattack country...')
 		attacks = []
 		for index, element in enumerate(cyberattacks):
@@ -54,7 +55,8 @@ class ScrapeHuntersPage:
 			attacks.append(self.getSelectedAttackData())
 
 		logging.info('Writing attacks in file...')
-		with open('./data/attacks.json', 'w', encoding='utf-8') as f:
+		today = date.today().strftime('%Y%m%d')
+		with open(f'./data/{today}.json', 'w', encoding='utf-8') as f:
 			json.dump(attacks, f, indent=4, ensure_ascii=False)
 
 
