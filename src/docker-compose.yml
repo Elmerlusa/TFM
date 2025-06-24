@@ -59,11 +59,6 @@ services:
     networks:
       - tfm_network
     restart: always
-    # healthcheck:
-    #   test: ["CMD", "sh", "-c", "nc -z localhost 9050"]
-    #   interval: 10s
-    #   timeout: 5s
-    #   retries: 5
 
   scraper:
     container_name: scraper
@@ -74,11 +69,20 @@ services:
     networks:
       - tfm_network
     depends_on:
-      - database #database:
+      - tor-proxy
         # condition: service_healthy
-      - tor-proxy #tor-proxy:
+
+  etl:
+    container_name: etl
+    build: ./etl/
+    image: etl
+    volumes:
+      - ./.volumes/.scraper:/app/data
+    networks:
+      - tfm_network
+    depends_on:
+      - scraper
         # condition: service_healthy
-    restart: always
 
 networks:
   tfm_network:

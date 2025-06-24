@@ -98,8 +98,6 @@ if __name__ == '__main__':
 				try:
 					data = json.load(f)
 					parsed_data = list(map(lambda x: parse_attack_data(x), data))
-					print('\n\n')
 					logging.error(parsed_data[0])
-					print('\n\n')
 				except json.JSONDecodeError as e:
 					logging.error(e)
