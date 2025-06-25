@@ -21,6 +21,11 @@ import lombok.RequiredArgsConstructor;
 public class Controller {
 	private final ICyberattacksService cyberattacksService;
 
+	@GetMapping("/health")
+	public boolean getHealth() {
+		return true;
+	}
+
 	@GetMapping("/ciberataques")
 	public List<AttackDTO> getAttacks() {
 		return this.cyberattacksService.getAttacks();
