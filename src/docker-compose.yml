@@ -71,7 +71,7 @@ services:
     build: ./scraper/
     image: scraper
     volumes:
-      - ./.volumes/.scraper:/app/data
+      - ./.volumes/scraper:/app/data
     networks:
       - tfm_network
     depends_on:
@@ -83,7 +83,7 @@ services:
     build: ./etl/
     image: etl
     volumes:
-      - ./.volumes/.scraper:/app/data
+      - ./.volumes/scraper:/app/data
     networks:
       - tfm_network
 
