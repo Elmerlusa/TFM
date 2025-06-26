@@ -28,7 +28,7 @@ dag = DAG(
 # Task 1: Clean up previous files
 cleanup_task = BashOperator(
     task_id='cleanup_previous_files',
-    bash_command='rm -f C:/Users/us_022_054/Downloads/TFM/src/.volumes/scraper/*.json',
+    bash_command='rm -f "/opt/airflow/data/scraped_data*.json"',
     dag=dag,
 )
 
@@ -39,8 +39,8 @@ scraper_task = DockerOperator(
     api_version='auto',
     auto_remove=True,
     docker_url='unix://var/run/docker.sock',
-    network_mode='bridge',
-    mounts=[Mount(source='C:/Users/us_022_054/Downloads/TFM/src/.volumes/scraper', target='/app/data', type='bind')],
+    network_mode='src_tfm_network',
+    mounts=[Mount(source='C:/Users/marti/Desktop/TFM/src/.volumes/scraper', target='/app/data', type='bind')],
     environment={
         'OUTPUT_FILE': '/app/data/scraped_data_{{ ds }}.json',
     },
@@ -80,8 +80,8 @@ etl_task = DockerOperator(
     api_version='auto',
     auto_remove=True,
     docker_url='unix://var/run/docker.sock',
-    network_mode='bridge',
-    mounts=[Mount(source='C:/Users/us_022_054/Downloads/TFM/src/.volumes/scraper', target='/app/data', type='bind')],
+    network_mode='src_tfm_network',
+    mounts=[Mount(source='C:/Users/marti/Desktop/TFM/src/.volumes/scraper', target='/app/data', type='bind')],
     environment={
         'INPUT_FILE': '/app/data/scraped_data_{{ ds }}.json',
         'PROCESSED_DATE': '{{ ds }}',

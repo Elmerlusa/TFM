@@ -62,14 +62,14 @@ class ScrapeHuntersPage:
 
 
 	def getSelectedAttackData(self):
-		attack_data = { 'cybercriminalName': 'hunters', 'company': {} }
+		attack_data = { 'cybercriminalName': 'hunters', 'target': {} }
 
 		# card info
 		selected_attack = self.driver.find_element(By.CSS_SELECTOR, '.selected-company > app-company-list-item')
 		metadata = selected_attack.find_element(By.CLASS_NAME, 'meta')
-		attack_data['company']['name'] = selected_attack.find_element(By.CSS_SELECTOR, '.data .content').text
-		attack_data['company']['revenue'] = metadata.find_element(By.XPATH, './*[1]//*[contains(@class, "value")]').text
-		attack_data['company']['size'] = metadata.find_element(By.XPATH, './*[2]//*[contains(@class, "value")]').text
+		attack_data['target']['name'] = selected_attack.find_element(By.CSS_SELECTOR, '.data .content').text
+		attack_data['target']['revenue'] = metadata.find_element(By.XPATH, './*[1]//*[contains(@class, "value")]').text
+		attack_data['target']['size'] = metadata.find_element(By.XPATH, './*[2]//*[contains(@class, "value")]').text
 		try:
 			attack_data['disclosures'] = metadata.find_element(By.XPATH, './*[4]//*[contains(@class, "value")]').text
 		except Exception:
@@ -78,7 +78,7 @@ class ScrapeHuntersPage:
 		# details info
 		attack_details = self.driver.find_element(By.TAG_NAME, 'app-company-overview')
 		website_link = attack_details.find_element(By.CSS_SELECTOR, '.details .value > a')
-		attack_data['company']['website'] = website_link.get_attribute('href')
+		attack_data['target']['website'] = website_link.get_attribute('href')
 		try:
 			disclosures = attack_details.find_elements(By.TAG_NAME, 'app-company-disclosure-item')
 			for index, disclosure in enumerate(disclosures):

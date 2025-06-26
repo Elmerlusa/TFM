@@ -4,7 +4,7 @@ from pymongo import MongoClient
 from datetime import datetime
 
 class MongoWrapper:
-	def __init__(self, mongo_uri='mongodb://localhost:27017'):
+	def __init__(self, mongo_uri='mongodb://database:27017'):
 		username = os.getenv('MONGO_INITDB_ROOT_USERNAME', 'admin')
 		password = os.getenv('MONGO_INITDB_ROOT_PASSWORD', 'admin')
 		db = os.getenv('MONGO_INITDB_DATABASE', 'cyberattacks')
