@@ -20,13 +20,8 @@ public class Attack {
 	
 	// extra
 	private LocalDate detectedAt;
-
-	// private String type;
-	// private String description;
-	// private Integer clientsAffected;
-	// private Integer recordsAffected;
-	// private String reputationalImpact;
-	// private Integer downtimeHours;
-	// private Target target;
-	// private String cybercriminalName;
+	private LocalDate notifiedAt;
+	private String description;
+	private Double downTimeHours;
+	private String reputationalImpact;
 }

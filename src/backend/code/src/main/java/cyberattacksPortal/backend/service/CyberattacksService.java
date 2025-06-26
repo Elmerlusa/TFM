@@ -1,8 +1,13 @@
 package cyberattacksPortal.backend.service;
 
+import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
@@ -10,11 +15,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import cyberattacksPortal.backend.model.Attack;
+import cyberattacksPortal.backend.model.Cybercriminal;
 import cyberattacksPortal.backend.model.ValueUnit;
 import cyberattacksPortal.backend.model.DTO.AttackDTO;
 import cyberattacksPortal.backend.model.DTO.CybercriminalDTO;
 import cyberattacksPortal.backend.model.DTO.CybercriminalDetailDTO;
-import cyberattacksPortal.backend.model.DTO.CybercriminalStatsDTO;
+import cyberattacksPortal.backend.model.DTO.CybercriminalInfoDTO;
+import cyberattacksPortal.backend.model.DTO.StatsDTO;
 import cyberattacksPortal.backend.repository.IAttackRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,7 +38,7 @@ public class CyberattacksService implements ICyberattacksService {
 
 		if (attacks.isEmpty()) {
 			log.error("no existen datos sobre ciberataques");
-			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "error");
+			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "no hay ciberataques registrados");
 		}
 		return attacks.stream().map(this::attackToDTO).toList();
 	}
@@ -42,7 +49,7 @@ public class CyberattacksService implements ICyberattacksService {
 
 		if (attacks.isEmpty()) {
 			log.error("no existen datos sobre cibercriminales");
-			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "error");
+			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "no hay cibercriminales registrados");
 		}
 		final Map<String, Long> grouped = attacks.stream()
 			.collect(Collectors.groupingBy(attack -> attack.getCybercriminal().getName(), Collectors.counting()));
@@ -71,86 +78,104 @@ public class CyberattacksService implements ICyberattacksService {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "ciberdelincuente no encontrado");
 		}
 		return new CybercriminalDetailDTO(
-			this.computeStats(attacks),
+			this.getCybercriminalInfo(name, attacks),
+			this.computeStats(attacks, false),
 			attacks.stream().map(this::attackToDTO).toList()
 		);
 	}
 
-	// @Override
-	// public GlobalStats getGlobalStats() {
-	// 	final List<GlobalStats> globalStatsList = this.globalStatsRepository.findAll();
-	// 	LocalDate threeMonthsAgo = LocalDate.now().minusMonths(3);
-	// 	GlobalStats globalStats;
-	// 	Long totalAttacksThreeMonths;
+	@Override
+	public StatsDTO getGlobalStats() {
+		final List<Attack> attacks = this.attackRepository.findAll();
+		
+		if (attacks.isEmpty()) {
+			log.warn("no existen datos sobre ciberataques");
+			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "no hay ciberataques registrados");
+		}
+		return this.computeStats(attacks, true);
+	}
 
-	// 	if (globalStatsList.isEmpty()) {
-	// 		log.error("no existen datos sobre estadísticas globales");
-	// 		throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "error");
-	// 	}
-	// 	globalStats = globalStatsList.get(0);
-	// 	totalAttacksThreeMonths = globalStats.getAttacksByDate().entrySet().stream()
-	// 		.filter(e -> threeMonthsAgo.isBefore(e.getKey())).count();
-	// 	globalStats.setTotalAttacksThreeMonths(totalAttacksThreeMonths);
-	// 	sortStatsMaps(globalStats);
-	// 	return globalStats;
-	// }
+	private StatsDTO computeStats(final List<Attack> attacks, final boolean computeCybercriminalCounts) {
+		// totals
+		int totalDisclosures = 0;
+		long totalLeakFiles = 0;
+		double totalLeakSize = 0;
 
-	// private void sortStatsMaps(final GlobalStats globalStats) {
-	// 	globalStats.setAttacksByGroup(
-	// 		globalStats.getAttacksByGroup().entrySet().stream()
-	// 		.sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
-	// 		.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new))
-	// 	);
-	// 	globalStats.setAttacksByType(
-	// 		globalStats.getAttacksByType().entrySet().stream()
-	// 		.sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
-	// 		.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new))
-	// 	);
-	// 	globalStats.setAttacksByRegion(
-	// 		globalStats.getAttacksByRegion().entrySet().stream()
-	// 		.sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
-	// 		.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new))
-	// 	);
-	// 	globalStats.setAttacksBySector(
-	// 		globalStats.getAttacksBySector().entrySet().stream()
-	// 		.sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
-	// 		.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new))
-	// 	);
-	// 	globalStats.setAttacksByTarget(
-	// 		globalStats.getAttacksByTarget().entrySet().stream()
-	// 		.sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
-	// 		.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new))
-	// 	);
-	// 	globalStats.setAttacksByDate(
-	// 		globalStats.getAttacksByDate().entrySet().stream()
-	// 		.sorted(Map.Entry.comparingByKey())
-	// 		.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new))
-	// 	);
-	// }
-
-	private CybercriminalStatsDTO computeStats(final List<Attack> attacks) {
-		final int totalDisclosures = attacks.stream()
-			.mapToInt(a -> a.getDisclosures() != null ? a.getDisclosures().getTotal() : 0)
-			.sum();
-		final long totalLeakFiles = attacks.stream()
-			.mapToLong(a -> a.getLeakFiles() != null ? a.getLeakFiles() : 0)
-			.sum();
-		final double totalLeakSize = attacks.stream()
-			.filter(a -> a.getLeakSize() != null)
-			.mapToDouble(a -> this.normalizeLeakSize(a.getLeakSize()))
-			.sum();
+		for (Attack a : attacks) {
+			if (a.getDisclosures() != null)
+				totalDisclosures += a.getDisclosures().getTotal();
+			if (a.getLeakFiles() != null)
+				totalLeakFiles += a.getLeakFiles();
+			if (a.getLeakSize() != null)
+				totalLeakSize += this.normalizeLeakSize(a.getLeakSize());
+		}
 		final ValueUnit leakSize = this.numberToLeakSize(totalLeakSize);
+
+		// counts
 		final Map<String, Long> targetCounts = attacks.stream()
 			.filter(a -> a.getTarget() != null && a.getTarget().getName() != null)
 			.collect(Collectors.groupingBy(a -> a.getTarget().getName(), Collectors.counting()));
-		
-		return new CybercriminalStatsDTO(
+		final Map<String, Long> sectorCounts = attacks.stream()
+			.filter(a -> a.getTarget() != null && a.getTarget().getSector() != null)
+			.collect(Collectors.groupingBy(a -> a.getTarget().getSector(), Collectors.counting()));
+		final Map<String, Long> regionCounts = attacks.stream()
+			.filter(a -> a.getTarget() != null && a.getTarget().getRegion() != null)
+			.collect(Collectors.groupingBy(a -> a.getTarget().getRegion(), Collectors.counting()));
+		final Map<LocalDate, Long> detectedAtCounts = attacks.stream()
+			.filter(a -> a.getDetectedAt() != null)
+			.collect(Collectors.groupingBy(a -> a.getDetectedAt(), Collectors.counting()));
+
+		Map<String, Long> cybercriminalCounts = new HashMap<String, Long>();
+		if (computeCybercriminalCounts) {
+			cybercriminalCounts = attacks.stream()
+				.filter(a -> a.getCybercriminal() != null && a.getCybercriminal().getName() != null)
+				.collect(Collectors.groupingBy(a -> a.getCybercriminal().getName(), Collectors.counting()));
+		}
+
+		return new StatsDTO(
 			attacks.size(),
 			totalDisclosures,
 			leakSize,
 			totalLeakFiles,
-			targetCounts
+			this.sortCategoryCountMap(targetCounts),
+			this.sortCategoryCountMap(sectorCounts),
+			this.sortCategoryCountMap(regionCounts),
+			this.sortCategoryCountMap(cybercriminalCounts),
+			this.sortDateCountMap(detectedAtCounts)
 		);
+	}
+
+	private CybercriminalInfoDTO getCybercriminalInfo(final String name, final List<Attack> attacks) {
+		final Set<String> telegrams = new HashSet<>();
+		final Set<String> wallets = new HashSet<>();
+		final Set<String> emails = new HashSet<>();
+		final Set<String> onions = new HashSet<>();
+
+		attacks.forEach(a -> {
+			final Cybercriminal cybercriminal = a.getCybercriminal();
+			
+			if (cybercriminal.getTelegram() != null)
+				telegrams.add(cybercriminal.getTelegram());
+			if (cybercriminal.getWallet() != null)
+				wallets.add(cybercriminal.getWallet());
+			if (cybercriminal.getEmail() != null)
+				emails.add(cybercriminal.getEmail());
+			if (cybercriminal.getOnion() != null)
+				onions.add(cybercriminal.getOnion());
+		});
+		return new CybercriminalInfoDTO(name, telegrams, wallets, emails, onions);
+	}
+
+	private LinkedHashMap<LocalDate, Long> sortDateCountMap(final Map<LocalDate, Long> map) {
+		return map.entrySet().stream()
+			.sorted(Map.Entry.comparingByKey())
+			.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
+	}
+
+	private LinkedHashMap<String, Long> sortCategoryCountMap(final Map<String, Long> map) {
+		return map.entrySet().stream()
+			.sorted(Map.Entry.<String, Long>comparingByValue().reversed())
+			.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
 	}
 
 	private double normalizeLeakSize(final ValueUnit leakSize) {

@@ -3,6 +3,7 @@ package cyberattacksPortal.backend.model.DTO;
 import java.util.List;
 
 public record CybercriminalDetailDTO (
-	CybercriminalStatsDTO stats,
+	CybercriminalInfoDTO info,
+	StatsDTO stats,
 	List<AttackDTO> attacks
 ) {}

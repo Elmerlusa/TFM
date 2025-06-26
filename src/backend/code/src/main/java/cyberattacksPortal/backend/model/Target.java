@@ -8,4 +8,8 @@ public class Target {
 	private String website;
 	private Integer size;
 	private Revenue revenue;
+	
+	// extra
+	private String region;
+	private String sector;
 }

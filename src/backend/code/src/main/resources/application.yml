@@ -5,7 +5,7 @@ spring:
   application:
     name: ciberataques
   profiles:
-    active: dev
+    active: docker
   data:
     mongodb:
       authentication-database: admin

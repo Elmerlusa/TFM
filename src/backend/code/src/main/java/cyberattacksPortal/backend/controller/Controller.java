@@ -11,6 +11,7 @@ import cyberattacksPortal.backend.model.Attack;
 import cyberattacksPortal.backend.model.DTO.AttackDTO;
 import cyberattacksPortal.backend.model.DTO.CybercriminalDTO;
 import cyberattacksPortal.backend.model.DTO.CybercriminalDetailDTO;
+import cyberattacksPortal.backend.model.DTO.StatsDTO;
 import cyberattacksPortal.backend.service.ICyberattacksService;
 import lombok.RequiredArgsConstructor;
 
@@ -45,8 +46,8 @@ public class Controller {
 		return this.cyberattacksService.getCybercriminalDetails(name);
 	}
 
-	// @GetMapping("/estadisticas")
-	// public GlobalStats getGlobalStats() {
-	// 	return this.cyberattacksService.getGlobalStats();
-	// }
+	@GetMapping("/estadisticas")
+	public StatsDTO getGlobalStats() {
+		return this.cyberattacksService.getGlobalStats();
+	}
 }
