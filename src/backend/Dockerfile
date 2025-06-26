@@ -5,6 +5,6 @@ RUN apt-get update \
 
 COPY code/target/CyberattacksPortal.war CyberattacksPortal.war
 
-EXPOSE 8080
+EXPOSE 8000
 
 ENTRYPOINT ["java", "-jar", "CyberattacksPortal.war"]
