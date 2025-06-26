@@ -1,32 +1,26 @@
 import datetime
 
-def parse_str(value):
+def parse_str(value: str):
     if value is None:
         return value
-    try:
-        string = str(value).strip()
-        if string == '':
-            return None
-        else:
-            return string
-    except (ValueError, TypeError):
-        return None
-
-def parse_date(value, format='%Y-%m-%d %H:%M:%S'):
+    string = value.strip()
+    return None if string == '' else string
+    
+def parse_date(value: str, format='%Y-%m-%d %H:%M:%S'):
     try:
         return datetime.strptime(parse_str(value), format)
     except (ValueError, TypeError):
         return None
 
-def parse_int(value):
+def parse_int(value: str):
     try:
-        return int(value)
+        return int(parse_str(value))
     except (ValueError, TypeError):
         return None
 
-def parse_float(value):
+def parse_float(value: str):
     try:
-        return float(value)
+        return float(parse_str(value))
     except (ValueError, TypeError):
         return None
 

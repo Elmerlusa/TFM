@@ -1,6 +1,7 @@
 import logging
 import time
 import json
+import os
 from datetime import date
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -10,6 +11,7 @@ from TorWebScraper import TorWebScraper
 
 class ScrapeHuntersPage:
 	def __init__(self, tor_web_scraper: TorWebScraper =None):
+		self.output_file = os.getenv('OUTPUT_FILE', f'./data/scraped_data_{date.today().strftime("%Y%m%d")}.json')
 		self.tor_web_scraper = tor_web_scraper
 		self.driver = self.tor_web_scraper.driver
 		self.wait = WebDriverWait(self.driver, 10)
@@ -55,8 +57,7 @@ class ScrapeHuntersPage:
 			attacks.append(self.getSelectedAttackData())
 
 		logging.info('Writing attacks in file...')
-		today = date.today().strftime('%Y%m%d')
-		with open(f'./data/{today}.json', 'w', encoding='utf-8') as f:
+		with open(self.output_file, 'w', encoding='utf-8') as f:
 			json.dump(attacks, f, indent=4, ensure_ascii=False)
 
 
@@ -87,6 +88,7 @@ class ScrapeHuntersPage:
 				title = disclosure.find_element(By.CLASS_NAME, 'd_title').text.lower()
 				if 'all' in title and 'data' in title:
 					attack_data['leakSize'] = disclosure.find_element(By.XPATH, './/*[contains(@class, "actions")]//*[contains(@class, "meta")]/*[1]').text
+					attack_data['leakFiles'] = disclosure.find_element(By.XPATH, './/*[contains(@class, "actions")]//*[contains(@class, "meta")]/*[3]').text
 		except Exception:
 			pass
 		return attack_data
