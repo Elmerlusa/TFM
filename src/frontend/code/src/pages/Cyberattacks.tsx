@@ -17,7 +17,7 @@ const Cyberattacks = () => {
 				const parsedData = [...data].map(d => {
 					return {
 						...d,
-						detectedAt: new Date(d.detectedAt)
+						detectedAt: d.detectedAt ? new Date(d.detectedAt) : null
 					};
 				});
 
@@ -28,15 +28,6 @@ const Cyberattacks = () => {
 
 	if (id)
 		return <Outlet />;
-	if (!cyberattacks) {
-		return (
-			<Container>
-				<Row>
-					<Spinner animation="grow" className="m-auto" />
-				</Row>
-			</Container>
-		);
-	}
 	return (
 		<Container className="card-animate">
 			{cyberattacks.map(c => <CyberattackCard cyberattack={c} key={c.id}/>)}

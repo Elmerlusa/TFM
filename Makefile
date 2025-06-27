@@ -6,6 +6,9 @@ include src/.env
 up:
 	docker compose -f ./src/docker-compose.yml up -d
 
+build:
+	docker compose -f ./src/docker-compose.yml build
+
 down: kill
 	docker compose -f ./src/docker-compose.yml down --rmi local -v
 
@@ -28,6 +31,13 @@ logs:
 
 databaseup:
 	docker compose -f ./src/docker-compose.yml up -d database
+
+scraperup:
+	docker compose -f ./src/docker-compose.yml build scraper etl
+	docker compose -f ./src/docker-compose.yml up -d database tor-proxy airflow-scheduler airflow-webserver
+
+webup:
+	docker compose -f ./src/docker-compose.yml up -d frontend
 
 mongoshell:
 	docker exec -it database mongosh -u ${MONGO_INITDB_ROOT_USERNAME} -p ${MONGO_INITDB_ROOT_PASSWORD}

@@ -72,6 +72,5 @@ if __name__ == '__main__':
             'target.region': get_region(),
             'target.sector': get_sector(),
             'detectedAt': get_past_date()
-
         }
         mongodb.scraped_attacks.update_one(query, {'$set': update})

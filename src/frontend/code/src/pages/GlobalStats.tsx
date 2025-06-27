@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
-import { IGlobalStats } from "../Interfaces";
+import { Istats } from "../Interfaces";
 import MyCalendarHeatmap from "../components/charts/MyCalendarHeatmap";
 import { Col, Container, Row } from "react-bootstrap";
 import BarChart from "../components/charts/BarChart";
 import PieChart from "../components/charts/PieChart";
 import SpainChart from "../components/charts/SpainHeatmap";
+import Statistics from "../components/Statistics";
 
 const GlobalStats = () => {
-	const [stats, setStats] = useState<IGlobalStats>();
+	const [stats, setStats] = useState<Istats>();
 
 	useEffect(() => {
 		fetch('/api/estadisticas')
@@ -23,36 +24,13 @@ const GlobalStats = () => {
 	const endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0);
 	const startDate = new Date(today.getFullYear(), today.getMonth(), 1);
 	startDate.setMonth(today.getMonth() - 3);
-	const parsedData = Object.entries(stats.attacksByDate).map(e => {
+	const parsedData = Object.entries(stats.detectedAtCounts).map(e => {
 		return { date: e[0], count: e[1] }
 	});
 
 	return (
 		<Container className="bg-dark rounded">
-			<Row>
-				<MyCalendarHeatmap data={stats.attacksByDate} />
-			</Row>
-			<Row className="my-2">
-				<Col xl={6} className="text-center">
-					<BarChart data={stats.attacksByTarget} title="Ciberataques por objetivo" horizontal />
-				</Col>
-				<Col xl={6} className="text-center">
-					<BarChart data={stats.attacksByGroup} title="Ciberataques por atacante" horizontal />
-				</Col>
-			</Row>
-			<Row>
-				<Col xl={6} className="text-center">
-					<BarChart data={stats.attacksBySector} title="Ciberataques por sector" horizontal />
-				</Col>
-				<Col xl={6} className="text-center">
-					<PieChart data={stats.attacksByType} title="Distribución de ciberataques según su tipo" />
-				</Col>
-			</Row>
-			<Row className="my-2">
-				<Col className="text-center">
-					<SpainChart data={stats.attacksByRegion} title="Ciberataques por provincia" />
-				</Col>
-			</Row>
+			<Statistics stats={stats} renderCybercriminalCounts / >
 		</Container>
 	);
 };

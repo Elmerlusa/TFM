@@ -2,9 +2,9 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router";
 import { ICyberattackDetails } from "../Interfaces";
 import { Badge, Col, Container, Row } from "react-bootstrap";
-import { formatDate } from "../utils/utils";
+import { formatIsoStringDate } from "../utils/utils";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faBell, faBug, faCalendarAlt, faCrosshairs, faDatabase, faExclamationTriangle, faFish, faIndustry, faLock, faMapLocationDot, faNewspaper, faUserSecret, faWifi } from "@fortawesome/free-solid-svg-icons";
+import { faBell, faCalendarAlt, faCrosshairs, faIndustry, faMapLocationDot, faNewspaper, faUserSecret} from "@fortawesome/free-solid-svg-icons";
 
 const CyberattackDetails = () => {
 	const [cyberattackDetails, setCyberattackDetails] = useState<ICyberattackDetails>();
@@ -16,7 +16,7 @@ const CyberattackDetails = () => {
 			.then(data => {
 				const parsedData = {
 					...data,
-					detectedAt: new Date(data.detectedAt),
+					detectedAt: data.detectedAt ? new Date(data.detectedAt) : null,
 					notifiedAt: data.notifiedAt ? new Date(data.notifiedAt) : null,
 				};
 
@@ -25,20 +25,8 @@ const CyberattackDetails = () => {
 			.catch(e => alert(e));
 	}, [id]);
 
-	const getTypeIcon = (type: string) => {
-		const icons: Record<string, any> = {
-			'Ransomware': faLock,
-			'Phising': faFish,
-			'DDos': faWifi,
-			'SQL Injection': faDatabase,
-			'Malware': faBug,
-		};
-		return icons[type] || faExclamationTriangle;
-	};
-
 	if (!cyberattackDetails)
 		return <></>;
-
 	return (
 		<Container className="bg-dark rounded p-4 fs-5">
 			<Row className="border-bottom mb-3">
@@ -48,14 +36,8 @@ const CyberattackDetails = () => {
 						<Col>
 							<p>
 								<FontAwesomeIcon icon={faUserSecret} className="me-2" />
-								Atacante: {cyberattackDetails.cybercriminalName}
+								Atacante: {cyberattackDetails.cybercriminal.name}
 							</p>
-						</Col>
-						<Col className="text-end">
-							<Badge bg="primary">
-								<FontAwesomeIcon icon={getTypeIcon(cyberattackDetails.type)} className="me-2"></FontAwesomeIcon>
-								{cyberattackDetails.type}
-							</Badge>
 						</Col>
 					</Row>
 					<p>
@@ -66,14 +48,14 @@ const CyberattackDetails = () => {
 						<Col>
 							<p>
 								<FontAwesomeIcon icon={faCalendarAlt} className="me-2" />
-								Detectado el {formatDate(cyberattackDetails.detectedAt.toISOString())}
+								Detectado el {formatIsoStringDate(cyberattackDetails.detectedAt.toISOString())}
 							</p>
 						</Col>
 						<Col>
 							<p>
 								<FontAwesomeIcon icon={faBell} className="me-2" />
 								{cyberattackDetails.notifiedAt ? 
-									<span>Notificado el {formatDate(cyberattackDetails.notifiedAt.toISOString())}</span>
+									<span>Notificado el {formatIsoStringDate(cyberattackDetails.notifiedAt.toISOString())}</span>
 									: <span>Sin notificar</span>
 								}
 							</p>
@@ -94,7 +76,7 @@ const CyberattackDetails = () => {
 					</p>
 					<p>
 						<FontAwesomeIcon icon={faMapLocationDot} className="me-2" />
-						{cyberattackDetails.target.regions.join('/')}, {cyberattackDetails.target.country}
+						{`${cyberattackDetails.target.region}, España`}
 					</p>
 				</Col>
 			</Row>

@@ -1,9 +1,8 @@
 import * as d3 from "d3";
-import { ICategoryCount } from "../../Interfaces";
 import { useEffect, useRef, useState, useCallback } from "react";
 
 interface Props {
-	data: ICategoryCount | undefined,
+	data: Record<string, number> | undefined,
 	title: string,
 }
 
@@ -29,7 +28,7 @@ const PieChart = ({
 	// Función para crear los sectores del gráfico de tarta
 	const createPieSlices = useCallback((
 		svg: d3.Selection<SVGSVGElement | null, unknown, null, undefined>,
-		data: ICategoryCount,
+		data: Record<string, number>,
 		currentWidth: number,
 		currentHeight: number,
 		radius: number
@@ -73,7 +72,7 @@ const PieChart = ({
 
 	const createLegend = useCallback((
 		svg: d3.Selection<SVGSVGElement | null, unknown, null, undefined>,
-		data: ICategoryCount,
+		data: Record<string, number>,
 		currentWidth: number,
 		currentHeight: number
 	) => {

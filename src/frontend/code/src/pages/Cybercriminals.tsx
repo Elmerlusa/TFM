@@ -17,10 +17,9 @@ const Cybercriminals = () => {
 				const parsedData = [...data].map(d => {
 					return {
 						...d,
-						lastAttackAt: new Date(d.lastAttackAt)
+						lastAttackAt: d.lastAttackAt ? new Date(d.lastAttackAt) : null
 					};
 				});
-
 				setCybercriminals(parsedData);
 			})
 			.catch(() => alert('ERROR'));

@@ -1,75 +1,89 @@
 export interface ICybercriminalAbstract {
 	name: string,
+	attackCount: number,
 	lastAttackAt: Date,
-	totalAttacks: number,
 };
 
-export interface ICyberattackAbstract {
-	id: number,
-	detectedAt: Date,
-	type: string,
-	targetName: string,
-	cybercriminalName: string,
-};
-
-export interface ICategoryCount {
-	[category: string]: number
+interface ILeakSize {
+	value: number,
+	unit: string,
 }
 
-export interface ICybercriminalStats {
-	attacksByRegion: ICategoryCount,
-	attacksBySector: ICategoryCount,
-	attacksByTarget: ICategoryCount,
-	attacksByType: ICategoryCount,
-	totalAttacks: number,
+export interface ICyberattackAbstract {
+	id: string,
+	cybercriminalName: string,
+	targetName: string,
+	leakSize: ILeakSize,
+	detectedAt: Date,
+};
+
+export interface ICybercriminalGroupedInfo {
+	name: string,
+	telegrams: string[],
+	wallets: string[],
+	onions: string[],
+	emails: string[],
 }
 
 export interface ICybercriminalDetails {
-	id: string,
-	name: string,
-	onion: string,
-	telegram: string,
-	emails: string[],
-	wallets: string[],
-	stats: ICybercriminalStats,
+	info: ICybercriminalGroupedInfo,
+	stats: Istats,
 	attacks: ICyberattackAbstract[],
 };
 
+interface IRevenue {
+	value: number,
+	mulitplier: string,
+	unit: string
+}
+
 export interface ITarget {
 	name: string,
+	website: string,
+	size: number,
+	revenue: IRevenue,
+	region: string,
 	sector: string,
-	cnae: number,
-	contact: string,
-	regions: string[],
-	country: string,
-	addresses: string[],
-	email: string,
 };
+
+export interface ICybercriminalInfo {
+	name: string,
+	telegram: string,
+	wallet: string,
+	onion: string,
+	emails: string,
+}
+
+interface IDisclosures {
+	completed: number,
+	total: number,
+}
 
 export interface ICyberattackDetails {
-	id: number,
+	id: string,
+	cybercriminal: ICybercriminalInfo,
+	disclosures: IDisclosures,
+	leakSize: ILeakSize,
+	leakFiles: number,
+	target: ITarget,
 	detectedAt: Date,
 	notifiedAt: Date,
-	type: string,
 	description: string,
-	clientsAffected: number,
-	recordsAffected: number,
-	reputationalImpact: string,
 	dowtimeHours: number,
-	target: ITarget,
-	cybercriminalName: string,
-	cybercriminal: ICybercriminalDetails,
+	reputationalImpact: string,
 };
 
-export interface IGlobalStats {
-	id: string,
-	attacksByGroup: ICategoryCount,
-	attacksByRegion: ICategoryCount,
-	attacksBySector: ICategoryCount,
-	attacksByTarget: ICategoryCount,
-	attacksByType: ICategoryCount,
-	attacksByDate: ICategoryCount,
-	numGroups: number,
-	totalAttacks: number,
-	totalAttacksThreeMonths: number
+export interface Istats {
+	attackCount: number,
+	totalDisclosures: number,
+	totalLeakSize: ILeakSize,
+	totalLeakFiles: number,
+	targetCounts: Record<string, number>,
+	sectorCounts: Record<string, number>,
+	regionCounts: Record<string, number>,
+	cybercriminalCounts: Record<string, number>,
+	detectedAtCounts: Record<string, number>,
+
+	// numGroups: number,
+	// totalAttacksThreeMonths: number
 };

@@ -16,18 +16,21 @@ const CybercriminalCard = ({ cybercriminal }: ICybercriminalAbstractProps) => {
 					{cybercriminal.name}
 				</h2>
 				<Badge bg="primary">
-					{cybercriminal.totalAttacks} ataques
+					{cybercriminal.attackCount} ataques
 				</Badge>
 			</Card.Header>
 			<Card.Body>
-				<p className="m-0">
-					<FontAwesomeIcon icon={faClock} className="me-2"></FontAwesomeIcon>
-					Último ataque: {' '}
-					{cybercriminal.lastAttackAt.toLocaleDateString(
-						navigator.language,
-						{ month: '2-digit', day: '2-digit', year: 'numeric' }
-					)}
-				</p>
+				{
+					cybercriminal.lastAttackAt &&
+					<p className="m-0">
+						<FontAwesomeIcon icon={faClock} className="me-2"></FontAwesomeIcon>
+						Último ataque: {' '}
+						{cybercriminal.lastAttackAt.toLocaleDateString(
+							navigator.language,
+							{ month: '2-digit', day: '2-digit', year: 'numeric' }
+						)}
+					</p>
+				}
 				<NavLink to={`/cibercriminales/${cybercriminal.name}`} className="stretched-link"></NavLink>
 			</Card.Body>
 		</Card>

@@ -1,5 +1,4 @@
 import * as d3 from "d3";
-import { ICategoryCount } from "../../Interfaces";
 import { useEffect, useRef, useState, useCallback } from "react";
 import { FeatureCollection, Geometry } from "geojson";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -7,7 +6,7 @@ import { faMinus, faPlus, faRotateRight } from "@fortawesome/free-solid-svg-icon
 import "../../assets/css/SpainHeatmap.css"
 
 interface Props {
-	data: ICategoryCount | undefined,
+	data: Record<string, number>,
 	title: string,
 	footer?: string,
 	width?: number,
@@ -201,6 +200,8 @@ const SpainChart = ({ data, title, footer = "", width, height }: Props) => {
 			svgRef.current.transition().call(zoomRef.current.transform, d3.zoomIdentity);
 		}
 	};
+	
+	if (!data || data.size === 0) return <></>;
 
 	return (
 		<div 

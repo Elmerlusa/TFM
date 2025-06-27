@@ -20,26 +20,29 @@ const CybercriminalDetails = () => {
 					attacks: [...data?.attacks].map(a => {
 						return {
 							...a,
-							detectedAt: new Date(a.detectedAt),
+							detectedAt: a.detectedAt ? new Date(a.detectedAt) : null,
 						}
 					})
 				};
-
 				setCybercriminalDetails(parsedData);
 			})
 			.catch(e => alert(e));
 	}, [name]);
 
+	if (!cybercriminalDetails) return <></>;
+
 	return (
 		<Container>
-			<h1 className="my-4 text-center pb-2 border-bottom">{cybercriminalDetails?.name.toUpperCase()}</h1>
+			<h1 className="my-4 text-center pb-2 border-bottom">{cybercriminalDetails.info.name.toUpperCase()}</h1>
 			<section className="my-4">
 				<h2 className="mb-4">Direcciones</h2>
-				<CybercriminalInfo info={cybercriminalDetails} />
+				<CybercriminalInfo info={cybercriminalDetails.info} />
 			</section>
 			<section className="my-4">
 				<h2 className="mb-4">Estadísticas</h2>
-				<Statistics lastAttackAt={cybercriminalDetails?.attacks[0].detectedAt} stats={cybercriminalDetails?.stats} />
+				{	cybercriminalDetails.stats &&
+					<Statistics stats={cybercriminalDetails?.stats} />
+				}
 			</section>
 			<section className="my-4">
 				<h2 className="mb-4">Últimos ataques</h2>

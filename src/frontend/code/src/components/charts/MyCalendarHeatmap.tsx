@@ -1,14 +1,14 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import * as d3 from "d3";
-import { ICategoryCount } from "../../Interfaces";
 
 interface Props {
-	data: ICategoryCount | undefined,
+	data: Record<string, number>,
+	title: string,
 	cellSize?: number,
-	monthsToShow?: number
+	monthsToShow?: number,
 }
 
-const CalendarHeatmap = ({ 
+const MyCalendarHeatmap = ({ 
 	data, 
 	cellSize = 30,
 	monthsToShow = 3
@@ -46,7 +46,7 @@ const CalendarHeatmap = ({
 		return { allDates, months, startDate, endDate };
 	}, [monthsToShow]);
 
-	const createColorScale = useCallback((data: ICategoryCount) => {
+	const createColorScale = useCallback((data: Record<string, number>) => {
 		const maxVal = d3.max(Object.values(data)) || 1;
 		return d3
 			.scaleLinear<string>()
@@ -58,7 +58,7 @@ const CalendarHeatmap = ({
 		g: d3.Selection<SVGGElement, unknown, null, undefined>,
 		months: Date[],
 		allDates: Date[],
-		data: ICategoryCount,
+		data: Record<string, number>,
 		color: d3.ScaleLinear<string, string, never>,
 		cellSize: number,
 		cellPadding: number,
@@ -91,7 +91,7 @@ const CalendarHeatmap = ({
 					const numDay = d.getDay() || 7; // domingo como último día
 					const x = (numDay - 1) * (cellSize + cellPadding);
 					let timeCount = d3.timeWeek.count(month, d);
-					if (numDay == 7) timeCount -= 1;
+					if (numDay === 7) timeCount -= 1;
 					const y = timeCount * (cellSize + cellPadding);
 					return `translate(${x}, ${y})`;
 				});
@@ -274,4 +274,4 @@ const CalendarHeatmap = ({
 	);
 };
 
-export default CalendarHeatmap;
+export default MyCalendarHeatmap;

@@ -1,9 +1,8 @@
 import * as d3 from "d3";
-import { ICategoryCount } from "../../Interfaces";
 import { useEffect, useRef, useState, useCallback } from "react";
 
 interface Props {
-	data: ICategoryCount | undefined,
+	data: Record<string, number> | undefined,
 	title: string,
 	footer?: string,
 	horizontal?: boolean
@@ -30,7 +29,7 @@ const BarChart = ({
 
 	const createHorizontalBarChart = useCallback((
 		svg: d3.Selection<SVGSVGElement | null, unknown, null, undefined>,
-		data: ICategoryCount,
+		data: Record<string, number>,
 		currentWidth: number,
 		currentHeight: number,
 		margin: { top: number; right: number; bottom: number; left: number }
@@ -106,7 +105,7 @@ const BarChart = ({
 
 	const createVerticalBarChart = useCallback((
 		svg: d3.Selection<SVGSVGElement | null, unknown, null, undefined>,
-		data: ICategoryCount,
+		data: Record<string, number>,
 		currentWidth: number,
 		currentHeight: number,
 		margin: { top: number; right: number; bottom: number; left: number }
