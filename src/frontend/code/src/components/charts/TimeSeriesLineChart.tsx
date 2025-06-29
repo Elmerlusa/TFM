@@ -129,6 +129,17 @@ const TimeSeriesLineChart = ({
 		currentHeight: number,
 		margin: { top: number; right: number; bottom: number; left: number }
 	) => {
+		const localeEs = d3.timeFormatLocale({
+			"dateTime": "%A, %e de %B de %Y, %X",
+			"date": "%d/%m/%Y",
+			"time": "%H:%M:%S",
+			"periods": ["AM", "PM"],
+			"days": ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"],
+			"shortDays": ["dom", "lun", "mar", "mié", "jue", "vie", "sáb"],
+			"months": ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"],
+			"shortMonths": ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"]
+		});
+
 		const innerWidth = currentWidth - margin.left - margin.right;
 		const innerHeight = currentHeight - margin.top - margin.bottom;
 
@@ -160,9 +171,16 @@ const TimeSeriesLineChart = ({
 			.curve(d3.curveMonotoneX);
 
 		// Add axes
+		const nonZeroDates = processedData
+			.filter(d => d.count !== 0)
+			.map(d => d.date);
+
+		const uniqueDates = Array.from(new Set(nonZeroDates.map(d => d.getTime())))
+			.map(time => new Date(time));
+
 		const xAxis = d3.axisBottom(xScale)
-			.tickFormat(d3.timeFormat("%b %Y") as any)
-			.ticks(d3.timeMonth.every(3));
+			.tickFormat(localeEs.format("%d %B %Y") as any)
+			.tickValues(uniqueDates);
 
 		const yAxis = d3.axisLeft(yScale)
 			.ticks(6)

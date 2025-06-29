@@ -51,7 +51,7 @@ export interface ICybercriminalInfo {
 	telegram: string,
 	wallet: string,
 	onion: string,
-	emails: string,
+	email: string,
 }
 
 export interface IDisclosures {

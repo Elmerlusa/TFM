@@ -4,7 +4,8 @@ import { ICyberattackDetails } from "../Interfaces";
 import { Card, Col, Container, ProgressBar, Row } from "react-bootstrap";
 import { formatIsoStringDate } from "../utils/utils";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faGlobe, faIndustry, faMapLocationDot, faMoneyBill, faUserGroup } from "@fortawesome/free-solid-svg-icons";
+import { faEnvelope, faGlobe, faIndustry, faMapLocationDot, faMoneyBill, faT, faUserGroup, faWallet } from "@fortawesome/free-solid-svg-icons";
+import { faTelegram } from "@fortawesome/free-brands-svg-icons";
 
 const CyberattackDetails = () => {
 	const [cyberattackDetails, setCyberattackDetails] = useState<ICyberattackDetails>();
@@ -113,7 +114,7 @@ const CyberattackDetails = () => {
 					}
 				</Col>
 			</Row>
-			<Row className="mb-3">
+			<Row className="border-bottom mb-3">
 				<Col>
 					<h2 className="text-info mb-4">{cyberattackDetails.target.name}</h2>
 					{cyberattackDetails.target.website &&
@@ -150,6 +151,39 @@ const CyberattackDetails = () => {
 					}
 				</Col>
 			</Row>
+			{(cyberattackDetails.cybercriminal.email || cyberattackDetails.cybercriminal.onion || cyberattackDetails.cybercriminal.telegram || cyberattackDetails.cybercriminal.wallet) &&
+				<Row>
+					<h2 className="text-danger mb-4">{cyberattackDetails.cybercriminal.name}</h2>
+					<Col lg={6} className="border-start border-4 border-warning ps-3 mb-3">
+						<p><FontAwesomeIcon icon={faT} size="lg" className="text-warning me-2" />Onion:</p>
+						{!cyberattackDetails.cybercriminal.onion ?
+							<p className="text-secondary">Sin datos</p> :
+							cyberattackDetails.cybercriminal.onion
+						}
+					</Col>
+					<Col lg={6} className="border-start border-4 border-danger ps-3 mb-3">
+						<p><FontAwesomeIcon icon={faTelegram} size="xl" className="text-danger me-2" />Telegram:</p>
+						{!cyberattackDetails.cybercriminal.telegram ?
+							<p className="text-secondary">Sin datos</p> :
+							cyberattackDetails.cybercriminal.telegram
+						}
+					</Col>
+					<Col lg={6} className="border-start border-4 border-info ps-3 mb-3">
+						<p><FontAwesomeIcon icon={faEnvelope} size="lg" className="text-info me-2" />Email:</p>
+						{!cyberattackDetails.cybercriminal.email ?
+							<p className="text-secondary">Sin datos</p> :
+							cyberattackDetails.cybercriminal.email
+						}
+					</Col>
+					<Col lg={6} className="border-start border-4 border-success ps-3 mb-3">
+						<p><FontAwesomeIcon icon={faWallet} size="lg" className="text-success me-2" />Wallet:</p>
+						{!cyberattackDetails.cybercriminal.wallet ?
+							<p className="text-secondary">Sin datos</p> :
+							cyberattackDetails.cybercriminal.wallet
+						}
+					</Col>
+				</Row>
+			}
 		</Container >
 	);
 };
