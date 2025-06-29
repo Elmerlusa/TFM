@@ -15,6 +15,7 @@ const MyCalendarHeatmap = ({
 }: Props) => {
 	const ref = useRef<SVGSVGElement | null>(null);
 	const containerRef = useRef<HTMLDivElement | null>(null);
+	const tooltipRef = useRef<d3.Selection<HTMLDivElement, unknown, HTMLElement, undefined> | null>(null);
 	const [dimensions, setDimensions] = useState({ width: 800, height: 300 });
 	const [responsiveCellSize, setResponsiveCellSize] = useState(cellSize);
 
@@ -54,6 +55,32 @@ const MyCalendarHeatmap = ({
 			.range(["#deebf7", "#08519c"]);
 	}, []);
 
+	const createTooltip = useCallback(() => {
+		// Remove existing tooltip if it exists
+		if (tooltipRef.current) {
+			tooltipRef.current.remove();
+		}
+
+		// Create new tooltip
+		tooltipRef.current = d3.select("body").append("div")
+			.attr("class", "calendar-tooltip")
+			.style("position", "absolute")
+			.style("opacity", "0")
+			.style("background-color", "rgba(0, 0, 0, 0.9)")
+			.style("color", "white")
+			.style("padding", "8px 12px")
+			.style("border-radius", "6px")
+			.style("font-size", "12px")
+			.style("font-family", "system-ui, -apple-system, sans-serif")
+			.style("pointer-events", "none")
+			.style("z-index", "10000")
+			.style("box-shadow", "0 4px 12px rgba(0, 0, 0, 0.3)")
+			.style("transition", "opacity 0.2s ease-in-out")
+			.style("white-space", "nowrap");
+
+		return tooltipRef.current;
+	}, []);
+
 	const renderCalendarMonths = useCallback((
 		g: d3.Selection<SVGGElement, unknown, null, undefined>,
 		months: Date[],
@@ -62,7 +89,8 @@ const MyCalendarHeatmap = ({
 		color: d3.ScaleLinear<string, string, never>,
 		cellSize: number,
 		cellPadding: number,
-		currentWidth: number
+		currentWidth: number,
+		tooltip: d3.Selection<HTMLDivElement, unknown, HTMLElement, undefined>
 	) => {
 		const fontSize = Math.max(10, Math.min(20, currentWidth / (monthsToShow * 20)));
 		const dayFontSize = Math.max(8, Math.min(12, cellSize / 3));
@@ -107,7 +135,7 @@ const MyCalendarHeatmap = ({
 					return `translate(${x}, ${y})`;
 				});
 
-			dayGroup
+			const rects = dayGroup
 				.append("rect")
 				.attr("width", cellSize)
 				.attr("height", cellSize)
@@ -120,13 +148,15 @@ const MyCalendarHeatmap = ({
 				.attr("stroke", "#fff")
 				.attr("stroke-width", 0.5)
 				.style("opacity", 0)
-				.transition()
+				.style("cursor", "pointer");
+
+			rects.transition()
 				.duration(500)
 				.delay((_, i) => i * 10)
 				.style("opacity", 1);
 
 			if (cellSize >= 20) {
-				dayGroup
+				const texts = dayGroup
 					.append("text")
 					.attr("x", cellSize / 2)
 					.attr("y", cellSize / 2 + 4)
@@ -134,38 +164,70 @@ const MyCalendarHeatmap = ({
 					.attr("font-size", `${dayFontSize}px`)
 					.attr("fill", "black")
 					.attr("font-weight", "bold")
+					.attr("pointer-events", "none")
 					.text(d => d3.timeFormat("%d")(d))
-					.style("opacity", 0)
-					.transition()
+					.style("opacity", 0);
+
+				texts.transition()
 					.duration(500)
 					.delay((_, i) => i * 10 + 200)
 					.style("opacity", 1);
 			}
 
 			dayGroup
-				.append("title")
-				.text(d => {
+				.on("mouseover", function (event, d) {
 					const dateStr = d3.timeFormat("%Y-%m-%d")(d);
 					const value = data[dateStr] ?? 0;
-					return `${d3.timeFormat("%d/%m/%Y")(d)}: ${value}`;
-				});
 
-			dayGroup
-				.style("cursor", "pointer")
-				.on("mouseover", function () {
+					// Highlight the rect
 					d3.select(this).select("rect")
 						.transition()
-						.duration(200)
+						.duration(150)
 						.attr("stroke-width", 2)
-						.attr("stroke", "#333");
+						.attr("stroke", "#333")
+						.style("filter", "brightness(1.1)");
+
+					// Show tooltip
+					if (tooltip) {
+						const [mouseX, mouseY] = d3.pointer(event, document.body);
+
+						tooltip
+							.style("opacity", 0)
+							.html(`<strong>${d3.timeFormat("%d/%m/%Y")(d)}</strong><br/>${value} ataque${value === 1 ? '' : 's'}`)
+							.style("left", `${mouseX + 10}px`)
+							.style("top", `${mouseY - 10}px`)
+							.transition()
+							.duration(200)
+							.style("opacity", 1);
+					}
+				})
+				.on("mousemove", function (event) {
+					// Update tooltip position on mouse move
+					if (tooltip && tooltip.style("opacity") !== "0") {
+						const [mouseX, mouseY] = d3.pointer(event, document.body);
+						tooltip
+							.style("left", `${mouseX + 10}px`)
+							.style("top", `${mouseY - 10}px`);
+					}
 				})
 				.on("mouseout", function () {
+					// Remove highlight
 					d3.select(this).select("rect")
 						.transition()
-						.duration(200)
+						.duration(150)
 						.attr("stroke-width", 0.5)
-						.attr("stroke", "#fff");
+						.attr("stroke", "#fff")
+						.style("filter", "none");
+
+					// Hide tooltip
+					if (tooltip) {
+						tooltip
+							.transition()
+							.duration(200)
+							.style("opacity", 0);
+					}
 				});
+
 		});
 	}, [monthsToShow]);
 
@@ -249,17 +311,19 @@ const MyCalendarHeatmap = ({
 		const { allDates, months } = createCalendarDates();
 		const color = createColorScale(data);
 
+		const tooltip = createTooltip();
+
 		svg.attr("width", currentWidth).attr("height", currentHeight);
 
 		const g = svg
 			.append("g")
 			.attr("transform", `translate(${margin.left}, ${margin.top})`);
 
-		renderCalendarMonths(g, months, allDates, data, color, responsiveCellSize, cellPadding, currentWidth);
+		renderCalendarMonths(g, months, allDates, data, color, responsiveCellSize, cellPadding, currentWidth, tooltip);
 
 		createLegend(svg, color, currentWidth, currentHeight, calendarHeight, margin);
 
-	}, [data, dimensions, responsiveCellSize, createCalendarDates, createColorScale, renderCalendarMonths, createLegend]);
+	}, [data, dimensions, responsiveCellSize, createCalendarDates, createColorScale, renderCalendarMonths, createLegend, createTooltip]);
 
 	useEffect(() => {
 		updateDimensions();

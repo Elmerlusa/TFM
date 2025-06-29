@@ -6,7 +6,7 @@ interface Props {
 	title: string,
 }
 
-const PieChart = ({ 
+const PieChart = ({
 	data,
 	title
 }: Props) => {
@@ -20,7 +20,7 @@ const PieChart = ({
 			const containerWidth = containerRef.current.offsetWidth;
 			const newWidth = containerWidth;
 			const newHeight = newWidth / 1.25;
-			
+
 			setDimensions({ width: newWidth, height: newHeight });
 		}
 	}, []);
@@ -43,6 +43,8 @@ const PieChart = ({
 
 		const arcs = pie(Object.values(data));
 		const labels = Object.keys(data);
+		const values = Object.values(data);
+		const total = d3.sum(values);
 
 		const arcGenerator = d3.arc<d3.PieArcDatum<number>>()
 			.innerRadius(0)
@@ -52,6 +54,20 @@ const PieChart = ({
 			.append("g")
 			.attr("transform", `translate(${currentWidth / 2}, ${currentHeight / 2})`);
 
+		// Tooltip
+		const tooltip = d3.select("body").append("div")
+			.attr("class", "tooltip")
+			.style("position", "absolute")
+			.style("opacity", "0")
+			.style("background-color", "rgba(0, 0, 0, 0.8)")
+			.style("color", "white")
+			.style("padding", "10px")
+			.style("border-radius", "5px")
+			.style("font-size", "12px")
+			.style("pointer-events", "none")
+			.style("z-index", "1000")
+			.style("transition", "opacity 0.2s");
+
 		// Animar creación
 		chart.selectAll("path")
 			.data(arcs)
@@ -60,6 +76,29 @@ const PieChart = ({
 			.attr("fill", (_, i) => color(labels[i]))
 			.attr("stroke", "#fff")
 			.attr("stroke-width", Math.max(1, currentWidth / 500))
+			.style("cursor", "pointer")
+			.on("mouseover", function (event, d) {
+				const label = labels[d.index];
+				const percentage = 100 * data[label] / total;
+
+				tooltip.transition()
+					.duration(200)
+					.style("opacity", 1);
+
+				tooltip.html(`<strong>${label}</strong><br/>${percentage.toFixed(2)}%`)
+					.style("top", (event.pageY - 40) + "px")
+					.style("left", (event.pageX + 10) + "px");
+			})
+			.on("mousemove", function (event) {
+				tooltip
+					.style("top", (event.pageY - 40) + "px")
+					.style("left", (event.pageX + 10) + "px");
+			})
+			.on("mouseout", function () {
+				tooltip.transition()
+					.duration(200)
+					.style("opacity", 0);
+			})
 			.transition()
 			.duration(800)
 			.attrTween("d", function (d) {
@@ -79,7 +118,7 @@ const PieChart = ({
 		const labels = Object.keys(data);
 		const values = Object.values(data);
 		const total = d3.sum(values);
-		
+
 		const color = d3.scaleOrdinal<string>()
 			.domain(labels)
 			.range(d3.schemeSet1);
@@ -149,7 +188,7 @@ const PieChart = ({
 
 		addTitle(svg, title, currentWidth, currentHeight);
 
-	}, [data, title, dimensions, createLegend, addTitle]);
+	}, [data, title, dimensions, createPieSlices, createLegend, addTitle]);
 
 	// Responsive
 	useEffect(() => {
@@ -167,10 +206,10 @@ const PieChart = ({
 
 	return (
 		<div ref={containerRef} className="w-full">
-			<svg 
-				ref={ref} 
-				width={dimensions.width} 
-				height={dimensions.height} 
+			<svg
+				ref={ref}
+				width={dimensions.width}
+				height={dimensions.height}
 				className="m-3 rounded"
 				style={{ maxWidth: '100%', height: 'auto' }}
 			/>

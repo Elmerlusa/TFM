@@ -106,6 +106,19 @@ const SpainChart = ({ data, title, footer = "", width, height }: Props) => {
 			.scaleSequential(d3.interpolateBlues)
 			.domain([0, d3.max(values) || 1]);
 
+		// Tooltip
+		const tooltip = d3.select("body").append("div")
+			.attr("class", "tooltip")
+			.style("position", "absolute")
+			.style("opacity", 0)
+			.style("background-color", "rgba(0, 0, 0, 0.8)")
+			.style("color", "white")
+			.style("padding", "8px 12px")
+			.style("border-radius", "4px")
+			.style("font-size", "12px")
+			.style("pointer-events", "none")
+			.style("z-index", "1000");
+
 		g
 			.selectAll("path")
 			.data(geoJson.features)
@@ -118,11 +131,37 @@ const SpainChart = ({ data, title, footer = "", width, height }: Props) => {
 				const value = data[name];
 				return value !== undefined ? color(value) : "#eee";
 			})
-			.append("title")
-			.text(d => {
+			.on("mouseover", function (event, d) {
 				const name = d.properties?.name || d.properties?.NAME_1 || "";
-				const value = data[name];
-				return `${name}: ${value ?? 0}`;
+				const value = data[name] ?? 0;
+
+				d3.select(this)
+					.transition()
+					.duration(200)
+					.attr("stroke-width", 1.5);
+
+				tooltip.transition()
+					.duration(200)
+					.style("opacity", 1);
+
+				tooltip.html(`<strong>${name}</strong><br/>${value} ${value === 1 ? "ataque" : "ataques"}`)
+					.style("left", (event.pageX + 10) + "px")
+					.style("top", (event.pageY - 40) + "px");
+			})
+			.on("mousemove", function (event) {
+				tooltip
+					.style("left", (event.pageX + 10) + "px")
+					.style("top", (event.pageY - 40) + "px");
+			})
+			.on("mouseout", function () {
+				d3.select(this)
+					.transition()
+					.duration(200)
+					.attr("stroke-width", 0.5);
+
+				tooltip.transition()
+					.duration(200)
+					.style("opacity", 0);
 			});
 
 		const titleFontSize = Math.max(12, 16 * scaleFactor);
@@ -200,19 +239,19 @@ const SpainChart = ({ data, title, footer = "", width, height }: Props) => {
 			svgRef.current.transition().call(zoomRef.current.transform, d3.zoomIdentity);
 		}
 	};
-	
+
 	if (!data || data.size === 0) return <></>;
 
 	return (
-		<div 
+		<div
 			ref={containerRef}
-			className="m-3 mx-auto rounded" 
+			className="m-3 mx-auto rounded"
 			style={{ width: dimensions.width, maxWidth: '100%' }}
 		>
-			<svg 
-				ref={ref} 
-				width={dimensions.width} 
-				height={dimensions.height} 
+			<svg
+				ref={ref}
+				width={dimensions.width}
+				height={dimensions.height}
 				className="all-scroll-pointer"
 				style={{ width: '100%', height: 'auto' }}
 			/>

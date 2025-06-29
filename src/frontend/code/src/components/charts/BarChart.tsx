@@ -8,7 +8,7 @@ interface Props {
 	horizontal?: boolean
 }
 
-const BarChart = ({ 
+const BarChart = ({
 	data,
 	title,
 	horizontal = false,
@@ -22,7 +22,7 @@ const BarChart = ({
 			const containerWidth = containerRef.current.offsetWidth;
 			const newWidth = containerWidth;
 			const newHeight = newWidth / 1.25; // anchura = altura * 1.25
-			
+
 			setDimensions({ width: newWidth, height: newHeight });
 		}
 	}, []);
@@ -61,6 +61,20 @@ const BarChart = ({
 			.append("g")
 			.attr("transform", `translate(${margin.left},${margin.top})`);
 
+		// Tooltip setup
+		const tooltip = d3.select("body").append("div")
+			.attr("class", "tooltip")
+			.style("position", "absolute")
+			.style("opacity", "0")
+			.style("background-color", "rgba(0, 0, 0, 0.8)")
+			.style("color", "white")
+			.style("padding", "10px")
+			.style("border-radius", "5px")
+			.style("font-size", "12px")
+			.style("pointer-events", "none")
+			.style("z-index", "1000")
+			.style("transition", "opacity 0.2s");
+
 		const xAxisTicks = Math.max(3, Math.min(10, Math.floor(innerWidth / 80)));
 		g.append("g")
 			.call(
@@ -85,18 +99,41 @@ const BarChart = ({
 			.attr("x", 0)
 			.attr("width", 0)
 			.attr("fill", (d) => color(data[d]))
+			.style("cursor", "pointer")
+			.on("mouseover", function (event, d) {
+				const count = data[d];
+				const formattedCount = `${count} ${count === 1 ? 'ataque' : 'ataques'}`;
+
+				tooltip.transition()
+					.duration(200)
+					.style("opacity", 1);
+
+				tooltip.html(`<strong>${d}</strong><br/>${formattedCount}`)
+					.style("top", (event.pageY - 40) + "px")
+					.style("left", (event.pageX + 10) + "px");
+			})
+			.on("mousemove", function (event) {
+				tooltip
+					.style("top", (event.pageY - 40) + "px")
+					.style("left", (event.pageX + 10) + "px");
+			})
+			.on("mouseout", function () {
+				tooltip.transition()
+					.duration(200)
+					.style("opacity", 0);
+			})
 			.transition()
 			.duration(800)
 			.delay((_, i) => i * 100)
 			.attr("width", (d) => x(data[d]));
-		
+
 		// Acortar texto al espacio
 		const maxLabelLength = Math.max(8, Math.floor(margin.left / 8));
 		svg.selectAll(".y-axis text")
-			.each(function(d) {
+			.each(function (d) {
 				const text = d3.select(this);
 				const fullLabel = text.text();
-				const shortLabel = fullLabel.length > maxLabelLength ? 
+				const shortLabel = fullLabel.length > maxLabelLength ?
 					fullLabel.slice(0, maxLabelLength).trimEnd() + "..." : fullLabel;
 				text.text(shortLabel);
 				text.append("title").text(fullLabel);
@@ -137,6 +174,20 @@ const BarChart = ({
 			.append("g")
 			.attr("transform", `translate(${margin.left}, ${margin.top})`);
 
+		// Tooltip setup
+		const tooltip = d3.select("body").append("div")
+			.attr("class", "tooltip")
+			.style("position", "absolute")
+			.style("opacity", "0")
+			.style("background-color", "rgba(0, 0, 0, 0.8)")
+			.style("color", "white")
+			.style("padding", "10px")
+			.style("border-radius", "5px")
+			.style("font-size", "12px")
+			.style("pointer-events", "none")
+			.style("z-index", "1000")
+			.style("transition", "opacity 0.2s");
+
 		// Eje Y responsive
 		const yAxisTicks = Math.max(3, Math.min(8, Math.floor(innerHeight / 50)));
 		g.append("g")
@@ -170,6 +221,29 @@ const BarChart = ({
 			.attr("width", x.bandwidth())
 			.attr("height", 0)
 			.attr("fill", d => color(data[d]))
+			.style("cursor", "pointer")
+			.on("mouseover", function (event, d) {
+				const count = data[d];
+				const formattedCount = `${count} ${count === 1 ? 'ataque' : 'ataques'}`;
+
+				tooltip.transition()
+					.duration(200)
+					.style("opacity", 1);
+
+				tooltip.html(`<strong>${d}</strong><br/>${formattedCount}`)
+					.style("top", (event.pageY - 40) + "px")
+					.style("left", (event.pageX + 10) + "px");
+			})
+			.on("mousemove", function (event) {
+				tooltip
+					.style("top", (event.pageY - 40) + "px")
+					.style("left", (event.pageX + 10) + "px");
+			})
+			.on("mouseout", function () {
+				tooltip.transition()
+					.duration(200)
+					.style("opacity", 0);
+			})
 			.transition()
 			.duration(800)
 			.delay((_, i) => i * 100)
@@ -244,10 +318,10 @@ const BarChart = ({
 
 	return (
 		<div ref={containerRef} className="w-full">
-			<svg 
-				ref={ref} 
-				width={dimensions.width} 
-				height={dimensions.height} 
+			<svg
+				ref={ref}
+				width={dimensions.width}
+				height={dimensions.height}
 				className="m-3 text-center"
 				style={{ maxWidth: '100%', height: 'auto' }}
 			/>
