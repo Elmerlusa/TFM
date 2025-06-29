@@ -39,6 +39,24 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+  
+  db-backup:
+    image: mongo:8.0.6
+    container_name: db-backup
+    env_file:
+      - ./.env
+    volumes:
+      - ./.volumes/mongo-backup:/backup
+    networks:
+      - tfm_network
+    entrypoint: ["/bin/sh", "-c"]
+    command: |
+        "mongodump --host=database --username=$MONGO_INITDB_ROOT_USERNAME --password=$MONGO_INITDB_ROOT_PASSWORD --authenticationDatabase=admin --out=/backup/dump && \
+        tar -czf /backup/$(date +%F-%H%M).tar.gz -C /backup dump && \
+        rm -rf /backup/dump"
+    depends_on:
+      database:
+        condition: service_healthy
 
   backend:
     container_name: backend
@@ -226,6 +244,8 @@ services:
       _AIRFLOW_WWW_USER_CREATE: 'true'
       _AIRFLOW_WWW_USER_USERNAME: ${_AIRFLOW_WWW_USER_USERNAME:-airflow}
       _AIRFLOW_WWW_USER_PASSWORD: ${_AIRFLOW_WWW_USER_PASSWORD:-airflow}
+      MONGO_INITDB_ROOT_USERNAME: ${_AIRFLOW_WWW_USER_USERNAME:-admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${_AIRFLOW_WWW_USER_PASSWORD:-admin}
       _PIP_ADDITIONAL_REQUIREMENTS: ''
     user: "${AIRFLOW_UID:-50000}:0"
     volumes:

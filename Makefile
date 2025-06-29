@@ -4,7 +4,8 @@ include src/.env
 .PHONY: up down ps restart kill rm re logs mongoshell
 #########################################################################
 up:
-	docker compose -f ./src/docker-compose.yml up -d
+	docker compose -f ./src/docker-compose.yml build scraper etl db-backup
+	docker compose -f ./src/docker-compose.yml up -d frontend tor-proxy airflow-scheduler airflow-webserver
 
 build:
 	docker compose -f ./src/docker-compose.yml build
@@ -33,7 +34,7 @@ databaseup:
 	docker compose -f ./src/docker-compose.yml up -d database
 
 scraperup:
-	docker compose -f ./src/docker-compose.yml build scraper etl
+	docker compose -f ./src/docker-compose.yml build scraper etl db-backup
 	docker compose -f ./src/docker-compose.yml up -d database tor-proxy airflow-scheduler airflow-webserver
 
 webup:
