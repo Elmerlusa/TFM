@@ -176,10 +176,12 @@ const TimeSeriesLineChart = ({
 			.style("text-anchor", "end")
 			.attr("dx", "-.8em")
 			.attr("dy", ".15em")
-			.attr("transform", "rotate(-45)");
+			.attr("transform", "rotate(-45)")
+			.attr("fill", "white");
 
 		g.append("g")
 			.attr("class", "y-axis")
+			.attr("fill", "white")
 			.call(yAxis);
 
 		// Add grid lines
