@@ -81,9 +81,15 @@ const TimeSeriesLineChart = ({
 			.map(dateStr => new Date(dateStr))
 			.sort((a, b) => a.getTime() - b.getTime());
 
+		const now = new Date();
 		// Get date range
-		const startDate = dates[0];
-		const endDate = dates[dates.length - 1];
+		let startDate = dates[0];
+		const endDate = d3.timeMonth.offset(dates[dates.length - 1], 0); // day 31
+		const monthDiff = (endDate.getFullYear() - startDate.getFullYear()) * 12 + (endDate.getMonth() - startDate.getMonth());
+
+		if (monthDiff < 2) {
+			startDate = d3.timeMonth.offset(now, -2);
+		}
 
 		// Fill in missing dates
 		const completeData = [];

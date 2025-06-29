@@ -4,7 +4,6 @@ import string
 from datetime import datetime, timedelta
 from pymongo import MongoClient
 
-
 def random_onion():
     onions = [
         'ftsgqtigrpvuc4dcfntpzkiczir6aid74xafeghouaxi5kamyin7et5b.onion',
@@ -37,19 +36,31 @@ def random_telegram():
 
 def get_region():
     regions = [
-        "Andalucía", "Aragón", "Asturias", "Islas Baleares", "Canarias", "Cantabria"
+        "Islas Baleares", "Huelva", "Asturias", "León",
     ]
     return random.choice(regions)
 
 def get_sector():
     sectors = [
-        "Tecnología", "Finanzas", "Salud", "Retail", "Educación", "Telecommunications"
+        "Tecnología", "Finanzas", "Salud", "Retail", "Educación"
     ]
     return random.choice(sectors)
 
 def get_past_date():
-    days_ago = random.randint(1, 365 * 5)  # Up to 5 years ago
+    days_ago = random.randint(1, 50)
     return (datetime.now() - timedelta(days=days_ago))
+
+def get_lorem_ipsum(word_count=100):
+    lorem_words = (
+        "lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt "
+        "ut labore et dolore magna aliqua ut enim ad minim veniam quis nostrud exercitation ullamco "
+        "laboris nisi ut aliquip ex ea commodo consequat duis aute irure dolor in reprehenderit in "
+        "voluptate velit esse cillum dolore eu fugiat nulla pariatur excepteur sint occaecat cupidatat "
+        "non proident sunt in culpa qui officia deserunt mollit anim id est laborum"
+    ).split()
+
+    paragraph = ' '.join(random.choices(lorem_words, k=word_count)).capitalize() + '.'
+    return paragraph
 
 if __name__ == '__main__':
     mongouri = 'mongodb://localhost:27017'
@@ -71,6 +82,9 @@ if __name__ == '__main__':
             'cybercriminal.onion': random_onion(),
             'target.region': get_region(),
             'target.sector': get_sector(),
-            'detectedAt': get_past_date()
+            'detectedAt': get_past_date(),
+            'description': get_lorem_ipsum(),
+            'downTimeHours': random.randint(1, 100),
+            'reputationalImpact': random.choice(['Aparece en prensa', 'No aparece en prensa'])
         }
         mongodb.scraped_attacks.update_one(query, {'$set': update})
