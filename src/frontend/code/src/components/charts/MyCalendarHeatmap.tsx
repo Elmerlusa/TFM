@@ -8,10 +8,10 @@ interface Props {
 	monthsToShow?: number,
 }
 
-const MyCalendarHeatmap = ({ 
-	data, 
+const MyCalendarHeatmap = ({
+	data,
 	cellSize = 30,
-	monthsToShow = 3
+	monthsToShow = 4
 }: Props) => {
 	const ref = useRef<SVGSVGElement | null>(null);
 	const containerRef = useRef<HTMLDivElement | null>(null);
@@ -22,27 +22,27 @@ const MyCalendarHeatmap = ({
 		if (containerRef.current) {
 			const containerWidth = containerRef.current.offsetWidth;
 			const newWidth = containerWidth;
-			
+
 			const minCellSize = 10;
-			const maxCellSize = 35;
+			const maxCellSize = 45;
 			const calculatedCellSize = Math.max(minCellSize, Math.min(maxCellSize, newWidth / (monthsToShow * 8)));
-			
+
 			const cellPadding = Math.max(2, calculatedCellSize * 0.2);
 			const calendarHeight = 5 * (calculatedCellSize + cellPadding);
 			const newHeight = (calendarHeight + 150);
-			
+
 			setDimensions({ width: newWidth, height: newHeight });
 			setResponsiveCellSize(calculatedCellSize);
 		}
-	}, [cellSize, monthsToShow]);
+	}, [monthsToShow]);
 
 	const createCalendarDates = useCallback(() => {
 		const now = new Date();
-		const startDate = d3.timeMonth.offset(now, -monthsToShow);
-		const endDate = d3.timeMonth.offset(d3.timeMonth.ceil(now), 0);
+		const startDate = d3.timeMonth.offset(now, -monthsToShow); // day 1
+		const endDate = d3.timeMonth.offset(d3.timeMonth.ceil(now), 0); // day 31
 		const allDates = d3.timeDays(startDate, endDate);
 		const months = d3.timeMonths(startDate, endDate);
-		
+
 		return { allDates, months, startDate, endDate };
 	}, [monthsToShow]);
 
@@ -66,7 +66,18 @@ const MyCalendarHeatmap = ({
 	) => {
 		const fontSize = Math.max(10, Math.min(20, currentWidth / (monthsToShow * 20)));
 		const dayFontSize = Math.max(8, Math.min(12, cellSize / 3));
-		
+
+		const localeEs = d3.timeFormatLocale({
+			"dateTime": "%A, %e de %B de %Y, %X",
+			"date": "%d/%m/%Y",
+			"time": "%H:%M:%S",
+			"periods": ["AM", "PM"],
+			"days": ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"],
+			"shortDays": ["dom", "lun", "mar", "mié", "jue", "vie", "sáb"],
+			"months": ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"],
+			"shortMonths": ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"]
+		});
+
 		months.forEach((month, i) => {
 			const monthDates = allDates.filter(d => d.getMonth() === month.getMonth());
 			const xMonth = i * (7 * (cellSize + cellPadding) + 10);
@@ -80,7 +91,7 @@ const MyCalendarHeatmap = ({
 				.attr("font-size", `${fontSize}px`)
 				.attr("font-weight", "bold")
 				.attr("fill", "white")
-				.text(d3.timeFormat(currentWidth < 600 ? "%b %Y" : "%B %Y")(month).toUpperCase());
+				.text(localeEs.format("%B %Y")(month).toUpperCase());
 
 			const dayGroup = monthGroup
 				.selectAll("g.day")
@@ -136,19 +147,19 @@ const MyCalendarHeatmap = ({
 				.text(d => {
 					const dateStr = d3.timeFormat("%Y-%m-%d")(d);
 					const value = data[dateStr] ?? 0;
-					return `${d3.timeFormat("%B %d, %Y")(d)}: ${value}`;
+					return `${d3.timeFormat("%d/%m/%Y")(d)}: ${value}`;
 				});
 
 			dayGroup
 				.style("cursor", "pointer")
-				.on("mouseover", function() {
+				.on("mouseover", function () {
 					d3.select(this).select("rect")
 						.transition()
 						.duration(200)
 						.attr("stroke-width", 2)
 						.attr("stroke", "#333");
 				})
-				.on("mouseout", function() {
+				.on("mouseout", function () {
 					d3.select(this).select("rect")
 						.transition()
 						.duration(200)
@@ -204,7 +215,7 @@ const MyCalendarHeatmap = ({
 			.range([legendHeight, 0]);
 
 		const legendAxis = d3.axisRight(legendScale)
-			.ticks(Math.min(6, Math.floor(legendHeight / 30)))
+			.ticks(6)
 			.tickFormat(d3.format("d"));
 
 		legendG.append("g")
@@ -226,7 +237,7 @@ const MyCalendarHeatmap = ({
 
 		const { width: currentWidth, height: currentHeight } = dimensions;
 		const cellPadding = Math.max(2, responsiveCellSize * 0.2);
-		
+
 		const margin = {
 			top: Math.max(60, currentHeight * 0.2),
 			right: currentWidth < 500 ? 20 : 80,
@@ -264,9 +275,9 @@ const MyCalendarHeatmap = ({
 
 	return (
 		<div ref={containerRef} className="w-full">
-			<svg 
-				ref={ref} 
-				width="100%" 
+			<svg
+				ref={ref}
+				width="100%"
 				className="my-3 mx-auto rounded"
 				style={{ maxWidth: '100%', height: 'auto' }}
 			/>

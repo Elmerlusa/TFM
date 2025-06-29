@@ -1,10 +1,6 @@
 import { useEffect, useState } from "react";
 import { Istats } from "../Interfaces";
-import MyCalendarHeatmap from "../components/charts/MyCalendarHeatmap";
-import { Col, Container, Row } from "react-bootstrap";
-import BarChart from "../components/charts/BarChart";
-import PieChart from "../components/charts/PieChart";
-import SpainChart from "../components/charts/SpainHeatmap";
+import { Container } from "react-bootstrap";
 import Statistics from "../components/Statistics";
 
 const GlobalStats = () => {
@@ -19,17 +15,9 @@ const GlobalStats = () => {
 
 	if (!stats)
 		return <></>;
-
-	const today = new Date();
-	const endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-	const startDate = new Date(today.getFullYear(), today.getMonth(), 1);
-	startDate.setMonth(today.getMonth() - 3);
-	const parsedData = Object.entries(stats.detectedAtCounts).map(e => {
-		return { date: e[0], count: e[1] }
-	});
-
+	
 	return (
-		<Container className="bg-dark rounded">
+		<Container className="bg-dark rounded p-5">
 			<Statistics stats={stats} renderCybercriminalCounts / >
 		</Container>
 	);

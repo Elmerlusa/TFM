@@ -11,3 +11,7 @@ export const formatDate = (date: Date) => {
 		{ month: '2-digit', day: '2-digit', year: 'numeric' }
 	);
 };
+
+export const formatCurrency = (value: number, multiplier: string, unit: string): string => {
+	return `${value}${multiplier} ${unit}`;
+};

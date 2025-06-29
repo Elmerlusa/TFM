@@ -54,7 +54,7 @@ export interface ICybercriminalInfo {
 	emails: string,
 }
 
-interface IDisclosures {
+export interface IDisclosures {
 	completed: number,
 	total: number,
 }
@@ -69,7 +69,7 @@ export interface ICyberattackDetails {
 	detectedAt: Date,
 	notifiedAt: Date,
 	description: string,
-	dowtimeHours: number,
+	downtimeHours: number,
 	reputationalImpact: string,
 };
 
