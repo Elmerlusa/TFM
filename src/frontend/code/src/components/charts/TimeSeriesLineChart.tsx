@@ -17,6 +17,7 @@ const TimeSeriesLineChart = ({
 }: Props) => {
 	const ref = useRef<SVGSVGElement | null>(null);
 	const containerRef = useRef<HTMLDivElement | null>(null);
+	const tooltipRef = useRef<d3.Selection<HTMLDivElement, unknown, HTMLElement, undefined> | null>(null);
 	const [dimensions, setDimensions] = useState({ width: 500, height: 500 });
 
 	// Función para actualizar las dimensiones
@@ -28,6 +29,32 @@ const TimeSeriesLineChart = ({
 
 			setDimensions({ width: newWidth, height: newHeight });
 		}
+	}, []);
+
+	const createTooltip = useCallback(() => {
+		// Remove existing tooltip if it exists
+		if (tooltipRef.current) {
+			tooltipRef.current.remove();
+		}
+
+		// Create new tooltip
+		tooltipRef.current = d3.select("body").append("div")
+			.attr("class", "tooltip")
+			.style("position", "absolute")
+			.style("opacity", "0")
+			.style("background-color", "rgba(0, 0, 0, 0.9)")
+			.style("color", "white")
+			.style("padding", "8px 12px")
+			.style("border-radius", "6px")
+			.style("font-size", "12px")
+			.style("font-family", "system-ui, -apple-system, sans-serif")
+			.style("pointer-events", "none")
+			.style("z-index", "10000")
+			.style("box-shadow", "0 4px 12px rgba(0, 0, 0, 0.3)")
+			.style("transition", "opacity 0.2s ease-in-out")
+			.style("white-space", "nowrap");
+
+		return tooltipRef.current;
 	}, []);
 
 	const processData = (rawData: Record<string, number>) => {
@@ -173,19 +200,7 @@ const TimeSeriesLineChart = ({
 			.attr("stroke-width", 2)
 			.attr("d", line);
 
-		// Create tooltip
-		const tooltip = d3.select("body").append("div")
-			.attr("class", "tooltip")
-			.style("position", "absolute")
-			.style("opacity", "0")
-			.style("background-color", "rgba(0, 0, 0, 0.8)")
-			.style("color", "white")
-			.style("padding", "10px")
-			.style("border-radius", "5px")
-			.style("font-size", "12px")
-			.style("pointer-events", "none")
-			.style("z-index", "1000")
-			.style("transition", "opacity 0.2s");
+		const tooltip = createTooltip();
 
 		// Add dots for actual data points
 		const actualDataPoints = processedData.filter(d =>
@@ -237,7 +252,7 @@ const TimeSeriesLineChart = ({
 			.attr("transform", `translate(${innerWidth / 2}, ${innerHeight + margin.bottom - 10})`)
 			.style("text-anchor", "middle")
 			.text("Date");
-	}, []);
+	}, [createTooltip]);
 
 	const renderChart = useCallback(() => {
 		if (!data) return;

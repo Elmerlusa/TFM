@@ -15,6 +15,7 @@ const BarChart = ({
 }: Props) => {
 	const ref = useRef<SVGSVGElement | null>(null);
 	const containerRef = useRef<HTMLDivElement | null>(null);
+	const tooltipRef = useRef<d3.Selection<HTMLDivElement, unknown, HTMLElement, undefined> | null>(null);
 	const [dimensions, setDimensions] = useState({ width: 500, height: 400 });
 
 	const updateDimensions = useCallback(() => {
@@ -25,6 +26,32 @@ const BarChart = ({
 
 			setDimensions({ width: newWidth, height: newHeight });
 		}
+	}, []);
+
+	const createTooltip = useCallback(() => {
+		// Remove existing tooltip if it exists
+		if (tooltipRef.current) {
+			tooltipRef.current.remove();
+		}
+
+		// Create new tooltip
+		tooltipRef.current = d3.select("body").append("div")
+			.attr("class", "tooltip")
+			.style("position", "absolute")
+			.style("opacity", "0")
+			.style("background-color", "rgba(0, 0, 0, 0.9)")
+			.style("color", "white")
+			.style("padding", "8px 12px")
+			.style("border-radius", "6px")
+			.style("font-size", "12px")
+			.style("font-family", "system-ui, -apple-system, sans-serif")
+			.style("pointer-events", "none")
+			.style("z-index", "10000")
+			.style("box-shadow", "0 4px 12px rgba(0, 0, 0, 0.3)")
+			.style("transition", "opacity 0.2s ease-in-out")
+			.style("white-space", "nowrap");
+
+		return tooltipRef.current;
 	}, []);
 
 	const createHorizontalBarChart = useCallback((
@@ -61,19 +88,7 @@ const BarChart = ({
 			.append("g")
 			.attr("transform", `translate(${margin.left},${margin.top})`);
 
-		// Tooltip setup
-		const tooltip = d3.select("body").append("div")
-			.attr("class", "tooltip")
-			.style("position", "absolute")
-			.style("opacity", "0")
-			.style("background-color", "rgba(0, 0, 0, 0.8)")
-			.style("color", "white")
-			.style("padding", "10px")
-			.style("border-radius", "5px")
-			.style("font-size", "12px")
-			.style("pointer-events", "none")
-			.style("z-index", "1000")
-			.style("transition", "opacity 0.2s");
+		const tooltip = createTooltip();
 
 		const xAxisTicks = Math.max(3, Math.min(10, Math.floor(innerWidth / 80)));
 		g.append("g")
@@ -138,7 +153,7 @@ const BarChart = ({
 				text.text(shortLabel);
 				text.append("title").text(fullLabel);
 			});
-	}, []);
+	}, [createTooltip]);
 
 	const createVerticalBarChart = useCallback((
 		svg: d3.Selection<SVGSVGElement | null, unknown, null, undefined>,
@@ -174,19 +189,7 @@ const BarChart = ({
 			.append("g")
 			.attr("transform", `translate(${margin.left}, ${margin.top})`);
 
-		// Tooltip setup
-		const tooltip = d3.select("body").append("div")
-			.attr("class", "tooltip")
-			.style("position", "absolute")
-			.style("opacity", "0")
-			.style("background-color", "rgba(0, 0, 0, 0.8)")
-			.style("color", "white")
-			.style("padding", "10px")
-			.style("border-radius", "5px")
-			.style("font-size", "12px")
-			.style("pointer-events", "none")
-			.style("z-index", "1000")
-			.style("transition", "opacity 0.2s");
+		const tooltip = createTooltip();
 
 		// Eje Y responsive
 		const yAxisTicks = Math.max(3, Math.min(8, Math.floor(innerHeight / 50)));
@@ -249,7 +252,7 @@ const BarChart = ({
 			.delay((_, i) => i * 100)
 			.attr("y", d => y(data[d]))
 			.attr("height", d => innerHeight - y(data[d]));
-	}, []);
+	}, [createTooltip]);
 
 	const addTitle = useCallback((
 		svg: d3.Selection<SVGSVGElement | null, unknown, null, undefined>,

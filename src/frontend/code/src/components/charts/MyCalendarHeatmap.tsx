@@ -63,7 +63,7 @@ const MyCalendarHeatmap = ({
 
 		// Create new tooltip
 		tooltipRef.current = d3.select("body").append("div")
-			.attr("class", "calendar-tooltip")
+			.attr("class", "tooltip")
 			.style("position", "absolute")
 			.style("opacity", "0")
 			.style("background-color", "rgba(0, 0, 0, 0.9)")
@@ -224,7 +224,8 @@ const MyCalendarHeatmap = ({
 						tooltip
 							.transition()
 							.duration(200)
-							.style("opacity", 0);
+							.style("opacity", 0)
+							.on("end", () => tooltip.html(""));
 					}
 				});
 

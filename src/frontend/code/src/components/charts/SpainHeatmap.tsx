@@ -18,6 +18,7 @@ const SpainChart = ({ data, title, footer = "", width, height }: Props) => {
 	const [dimensions, setDimensions] = useState({ width: width || 500, height: height || 400 });
 	const containerRef = useRef<HTMLDivElement | null>(null);
 	const ref = useRef<SVGSVGElement | null>(null);
+	const tooltipRef = useRef<d3.Selection<HTMLDivElement, unknown, HTMLElement, undefined> | null>(null);
 	const zoomRef = useRef<d3.ZoomBehavior<SVGSVGElement, unknown>>(undefined);
 	const svgRef = useRef<d3.Selection<SVGSVGElement, unknown, null, undefined>>(undefined);
 
@@ -57,6 +58,31 @@ const SpainChart = ({ data, title, footer = "", width, height }: Props) => {
 		window.addEventListener('resize', calculateDimensions);
 		return () => window.removeEventListener('resize', calculateDimensions);
 	}, [calculateDimensions]);
+	const createTooltip = useCallback(() => {
+		// Remove existing tooltip if it exists
+		if (tooltipRef.current) {
+			tooltipRef.current.remove();
+		}
+
+		// Create new tooltip
+		tooltipRef.current = d3.select("body").append("div")
+			.attr("class", "tooltip")
+			.style("position", "absolute")
+			.style("opacity", "0")
+			.style("background-color", "rgba(0, 0, 0, 0.9)")
+			.style("color", "white")
+			.style("padding", "8px 12px")
+			.style("border-radius", "6px")
+			.style("font-size", "12px")
+			.style("font-family", "system-ui, -apple-system, sans-serif")
+			.style("pointer-events", "none")
+			.style("z-index", "10000")
+			.style("box-shadow", "0 4px 12px rgba(0, 0, 0, 0.3)")
+			.style("transition", "opacity 0.2s ease-in-out")
+			.style("white-space", "nowrap");
+
+		return tooltipRef.current;
+	}, []);
 
 	useEffect(() => {
 		if (!data || !geoJson || !ref.current)
@@ -106,18 +132,7 @@ const SpainChart = ({ data, title, footer = "", width, height }: Props) => {
 			.scaleSequential(d3.interpolateBlues)
 			.domain([0, d3.max(values) || 1]);
 
-		// Tooltip
-		const tooltip = d3.select("body").append("div")
-			.attr("class", "tooltip")
-			.style("position", "absolute")
-			.style("opacity", 0)
-			.style("background-color", "rgba(0, 0, 0, 0.8)")
-			.style("color", "white")
-			.style("padding", "8px 12px")
-			.style("border-radius", "4px")
-			.style("font-size", "12px")
-			.style("pointer-events", "none")
-			.style("z-index", "1000");
+		const tooltip = createTooltip();
 
 		g
 			.selectAll("path")
@@ -161,7 +176,8 @@ const SpainChart = ({ data, title, footer = "", width, height }: Props) => {
 
 				tooltip.transition()
 					.duration(200)
-					.style("opacity", 0);
+					.style("opacity", 0)
+					.on("end", () => tooltip.html(""));
 			});
 
 		const titleFontSize = Math.max(12, 16 * scaleFactor);
@@ -220,7 +236,7 @@ const SpainChart = ({ data, title, footer = "", width, height }: Props) => {
 			.selectAll("text")
 			.style("font-size", `${Math.max(8, 10 * scaleFactor)}px`);
 
-	}, [data, title, footer, dimensions, geoJson]);
+	}, [data, title, footer, dimensions, geoJson, createTooltip]);
 
 	const handleZoomIn = () => {
 		if (svgRef.current && zoomRef.current) {

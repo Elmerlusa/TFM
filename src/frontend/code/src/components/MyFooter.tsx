@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Container } from "react-bootstrap";
 
 const MyFooter = () => {
+  document.querySelectorAll('.tooltip').forEach(t => t.remove());
 	return (
 		<footer className="py-4 text-center" style={{ backgroundColor: '#161b22', borderTop: '1px solid #30363d' }}>
         <Container>
