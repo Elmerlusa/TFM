@@ -1,6 +1,6 @@
 import { ICyberattackAbstract } from "../Interfaces";
 import { useEffect, useState } from "react";
-import { Container, Row, Spinner } from "react-bootstrap";
+import { Container } from "react-bootstrap";
 import { Outlet, useParams } from "react-router";
 import CyberattackCard from "../components/CyberattackCard";
 
@@ -28,6 +28,7 @@ const Cyberattacks = () => {
 
 	if (id)
 		return <Outlet />;
+	document.querySelectorAll('.tooltip').forEach(t => t.remove());
 	return (
 		<Container className="card-animate">
 			{cyberattacks.map(c => <CyberattackCard cyberattack={c} key={c.id}/>)}
