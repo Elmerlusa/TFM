@@ -50,7 +50,7 @@ def get_past_date():
     days_ago = random.randint(1, 50)
     return (datetime.now() - timedelta(days=days_ago))
 
-def get_lorem_ipsum(word_count=100):
+def get_lorem_ipsum(word_count=50):
     lorem_words = (
         "lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt "
         "ut labore et dolore magna aliqua ut enim ad minim veniam quis nostrud exercitation ullamco "
