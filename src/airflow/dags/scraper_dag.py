@@ -25,14 +25,7 @@ dag = DAG(
     max_active_runs=1,
 )
 
-# Task 1: Clean up previous files
-cleanup_task = BashOperator(
-    task_id='cleanup_previous_files',
-    bash_command='rm -f "/opt/airflow/data/scraped_data*.json"',
-    dag=dag,
-)
-
-# Task 2: Run web scraper
+# Task 1: Run web scraper
 scraper_task = DockerOperator(
     task_id='run_scraper',
     image='scraper',
@@ -42,38 +35,40 @@ scraper_task = DockerOperator(
     network_mode='src_tfm_network',
     mounts=[Mount(source='C:/Users/marti/Desktop/TFM/src/.volumes/scraper', target='/app/data', type='bind')],
     environment={
-        'OUTPUT_FILE': '/app/data/scraped_data_{{ ds }}.json',
+		'OUTPUT_DIR': '/app/data',
+        'OUTPUT_FILE_SUFFIX': '_scraped_data_{{ ds }}.json',
     },
     dag=dag,
 )
 
-# Task 3: Wait for scraper output file
+# Task 2: Wait for scraper output file
 file_sensor = FileSensor(
     task_id='wait_for_scraped_file',
-    filepath='/opt/airflow/data/scraped_data_{{ ds }}.json',
+    filepath='/opt/airflow/data/*_scraped_data_{{ ds }}.json',
     fs_conn_id='fs_default',
     poke_interval=5,
     timeout=300,
     dag=dag,
 )
 
-# Task 4: Validate scraped file
+# Task 3: Validate scraped file
 validate_file = BashOperator(
     task_id='validate_scraped_file',
     bash_command='''
-    FILE="/opt/airflow/data/scraped_data_{{ ds }}.json"
-    if [ -s "$FILE" ] && python3 -m json.tool "$FILE" > /dev/null 2>&1; then
-        echo "File is valid JSON and not empty"
-        exit 0
-    else
-        echo "File is invalid or empty"
-        exit 1
-    fi
+	for f in /opt/airflow/data/*_scraped_data_{{ ds }}.json; do
+        if [ -f "$f" ] && python3 -m json.tool "$f" > /dev/null 2>&1; then
+            echo "$f is valid JSON and not empty"
+        else
+            echo "$f is invalid or empty"
+            exit 1
+        fi
+	done
+	exit 0
     ''',
     dag=dag,
 )
 
-# Task 5: Run ETL process
+# Task 4: Run ETL process
 etl_task = DockerOperator(
     task_id='run_etl',
     image='etl',
@@ -83,22 +78,22 @@ etl_task = DockerOperator(
     network_mode='src_tfm_network',
     mounts=[Mount(source='C:/Users/marti/Desktop/TFM/src/.volumes/scraper', target='/app/data', type='bind')],
     environment={
-        'INPUT_FILE': '/app/data/scraped_data_{{ ds }}.json',
-        'PROCESSED_DATE': '{{ ds }}',
+        'INPUT_DIR': '/app/data',
+        'INPUT_FILE_SUFFIX': '_scraped_data_{{ ds }}.json'
     },
     dag=dag,
 )
 
-# Task 6: Cleanup successful run
+# Task 5: Cleanup successful run
 cleanup_success = BashOperator(
     task_id='cleanup_on_success',
     bash_command='''
     # Keep only last 7 days of files
-    find /opt/airflow/data -name "scraped_data_*.json" -mtime +7 -delete
+    find /opt/airflow/data/ -name "*_scraped_data_*.json" -mtime +7 -delete
     echo "Cleanup completed"
     ''',
     dag=dag,
 )
 
 # Define task dependencies
-cleanup_task >> scraper_task >> file_sensor >> validate_file >> etl_task >> cleanup_success
+scraper_task >> file_sensor >> validate_file >> etl_task >> cleanup_success

@@ -11,7 +11,7 @@ class MongoWrapper:
 		self.client = MongoClient(mongo_uri, username=username, password=password)
 		self.db = self.client[db]
 		logging.info(
-            'TorWebScraper(' \
+            'MongoWrapper(' \
             f'mongo_uri={mongo_uri}'
             ') created'
         )

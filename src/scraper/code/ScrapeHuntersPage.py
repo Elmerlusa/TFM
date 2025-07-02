@@ -2,7 +2,7 @@ import logging
 import time
 import json
 import os
-from datetime import date
+from datetime import date, datetime
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -11,7 +11,9 @@ from TorWebScraper import TorWebScraper
 
 class ScrapeHuntersPage:
 	def __init__(self, tor_web_scraper: TorWebScraper =None):
-		self.output_file = os.getenv('OUTPUT_FILE', f'./data/scraped_data_{date.today().strftime("%Y%m%d")}.json')
+		env_output_dir = os.getenv('OUTPUT_DIR', f'/app/data')
+		env_output_file_suffix = os.getenv('OUTPUT_FILE_SUFFIX', f'scraped_data_{date.today().strftime("%Y%m%d")}.json')
+		self.output_file = f'{env_output_dir}/hunters{env_output_file_suffix}'
 		self.tor_web_scraper = tor_web_scraper
 		self.driver = self.tor_web_scraper.driver
 		self.wait = WebDriverWait(self.driver, 10)
@@ -81,14 +83,12 @@ class ScrapeHuntersPage:
 		attack_data['target']['website'] = website_link.get_attribute('href')
 		try:
 			disclosures = attack_details.find_elements(By.TAG_NAME, 'app-company-disclosure-item')
-			for index, disclosure in enumerate(disclosures):
-				if index == 0:
-					date = disclosure.find_element(By.CSS_SELECTOR, '.status .date')
-					attack_data['firstDisclosureAt'] = date.text
+			for disclosure in disclosures:
 				title = disclosure.find_element(By.CLASS_NAME, 'd_title').text.lower()
 				if 'all' in title and 'data' in title:
 					attack_data['leakSize'] = disclosure.find_element(By.XPATH, './/*[contains(@class, "actions")]//*[contains(@class, "meta")]/*[1]').text
 					attack_data['leakFiles'] = disclosure.find_element(By.XPATH, './/*[contains(@class, "actions")]//*[contains(@class, "meta")]/*[3]').text
 		except Exception:
 			pass
+		attack_data['scrapedAt'] = datetime.now().isoformat()
 		return attack_data

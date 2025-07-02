@@ -1,3 +1,4 @@
+import glob
 import os
 import json
 import logging
@@ -25,17 +26,28 @@ def separate_attacks(parsed_attacks):
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
     mongo = MongoWrapper()
-    file = os.getenv('INPUT_FILE', f'./data/scraped_data_{date.today().strftime("%Y%m%d")}.json')
+    env_dir = os.getenv('INPUT_DIR', f'/app/data')
+    env_file_suffix = os.getenv('INPUT_FILE_SUFFIX', f'_scraped_data_{date.today().strftime("%Y%m%d")}.json')
     
     mongo.save_last_scrape()
-    with open(file, 'r', encoding='utf-8') as f:
-        try:
-            data = json.load(f)
-            parsed_data = list(map(lambda x: HuntersETL.parse_attack_data(x), data))
-            new_attacks, multiple_attacks = separate_attacks(parsed_data)
-            logging.info(f'There are {len(new_attacks)} new attacks')
-            if len(new_attacks) != 0:
-                mongo.save_cyberattacks(new_attacks)
-            logging.warning(f'There are {len(new_attacks)} multiple attacks')
-        except json.JSONDecodeError as e:
-            logging.error(e)
+
+    for file in glob.glob(f'{env_dir}/*{env_file_suffix}'):
+        if not os.path.isfile(file):
+            continue
+        filename = os.path.basename(file)
+        cybercriminal = filename.removesuffix(env_file_suffix)
+        logging.info(f'Parsing {cybercriminal} cyberattacks')
+        with open(file, 'r', encoding='utf-8') as f:
+            try:
+                data = json.load(f)
+                if cybercriminal == 'hunters':
+                    parsed_data = list(map(lambda x: HuntersETL.parse_attack_data(x), data))
+                else:
+                    raise Exception(f'No parser defined for {cybercriminal}')
+                new_attacks, multiple_attacks = separate_attacks(parsed_data)
+                logging.info(f'There are {len(new_attacks)} new attacks')
+                if len(new_attacks) != 0:
+                    mongo.save_cyberattacks(new_attacks)
+                logging.warning(f'There are {len(new_attacks)} multiple attacks')
+            except json.JSONDecodeError as e:
+                logging.error(e)

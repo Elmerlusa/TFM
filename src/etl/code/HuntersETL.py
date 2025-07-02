@@ -37,16 +37,7 @@ def parse_revenue(data):
 		return None
 	number = parse_float(match.group(1))
 	suffix = match.group(2)
-	return {'value': number * USD_TO_EUR, 'multiplier': suffix, 'unit': '€'}
-
-def normalize_firstDisclosureDate(data):
-	string = parse_str(data)
-	if not string:
-		return None
-	date = parse_date(string, '%d %B %Y')
-	if not date:
-		date = parse_date(f'{string} {datetime.now().year}', '%d %B %Y')
-	return date
+	return {'value': number * USD_TO_EUR, 'abbreviation': suffix, 'coin': '€'}
 
 def parse_website(data):
 	string = parse_str(data)
@@ -54,11 +45,16 @@ def parse_website(data):
 		return None
 	return string
 
+def parse_date_iso_format(date: str):
+	try:
+		return datetime.datetime.fromisoformat(date.strip())
+	except:
+		return None
+
 def parse_attack_data(data):
 	target_args = data.get('target', {})
 	cybercriminal_name = parse_str(data.get('cybercriminalName'))
 	target_name = parse_str(target_args.get('name'))
-	disclosure_date = normalize_firstDisclosureDate(data.get('firstDisclosureDate'))
 	parsed_data = {
 		'cybercriminal': {
 			'name': cybercriminal_name
@@ -66,7 +62,7 @@ def parse_attack_data(data):
 		'disclosures': parse_disclosures(data.get('disclosures')),
 		'leakSize': parse_leakSize(data.get('leakSize')),
 		'leakFiles': parse_int(data.get('leakFiles', '').replace(',', '').replace(' files', '')),
-		'firstDisclosureAt': disclosure_date,
+		'scrapedAt': parse_date_iso_format(data.get('scrapedAt')),
 	}
 	target = {
 		'name': target_name,
