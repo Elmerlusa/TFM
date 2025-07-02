@@ -28,7 +28,7 @@
 			"region": "León",
 			"sector": "Educación"
 		},
-		"detectedAt": "2025-06-17T18:33:47.621Z",
+		"detectedAt": "2025-06-01T18:33:47.621Z",
 		"reputationalImpact": "Aparece en prensa",
 		"description": "Laborum sed do excepteur laborum ipsum amet cillum excepteur officia tempor eu amet ipsum reprehenderit sit duis ipsum ipsum aute ut non consectetur duis sunt exercitation in adipiscing ullamco duis mollit et id nisi cillum quis id excepteur minim eu incididunt amet mollit in cupidatat sint irure consectetur magna tempor reprehenderit"
 	},
@@ -59,8 +59,7 @@
 			},
 			"region": "Galicia",
 			"sector": "Sanidad"
-		},
-		"detectedAt": "2025-06-09T18:33:47.621Z"
+		}
 	},
 	{
 		"cybercriminal": {
@@ -72,10 +71,6 @@
 		"disclosures": {
 			"completed": 10,
 			"total": 12
-		},
-		"leakSize": {
-			"value": 179,
-			"unit": "GB"
 		},
 		"leakFiles": 195086,
 		"target": {
@@ -241,5 +236,104 @@
 			"sector": "Tecnología"
 		},
 		"detectedAt": "2025-06-20T18:33:47.621Z"
+	},
+	{
+		"cybercriminal": {
+			"name": "Cybercriminal1",
+			"email": "7kcwlut5xw@mail2tor.com",
+			"onion": "xvl5hqbvt6ppy2pf42rvjkgv4io4mc5oxxehbskirfxy2rngthx5qip7.onion",
+			"telegram": "https://t.me/lafwjdcn",
+			"wallet": "3L0fVmGyEBrJF1eUSqIWobSlaXJv"
+		},
+		"disclosures": {
+			"completed": 10,
+			"total": 12
+		},
+		"leakSize": {
+			"value": 179,
+			"unit": "GB"
+		},
+		"leakFiles": 195086,
+		"target": {
+			"name": "Target6",
+			"website": "https://www.example.es/",
+			"size": 248,
+			"revenue": {
+				"value": 37.851000000000006,
+				"multiplier": "M",
+				"unit": "€"
+			},
+			"region": "Huelva",
+			"sector": "Educación"
+		},
+		"detectedAt": "2025-05-10T18:33:47.621Z",
+		"reputationalImpact": "Aparece en prensa",
+		"description": "Laborum sed do excepteur laborum ipsum amet cillum excepteur officia tempor eu amet ipsum reprehenderit sit duis ipsum ipsum aute ut non consectetur duis sunt exercitation in adipiscing ullamco duis mollit et id nisi cillum quis id excepteur minim eu incididunt amet mollit in cupidatat sint irure consectetur magna tempor reprehenderit"
+	},
+	{
+		"cybercriminal": {
+			"name": "Cybercriminal1",
+			"email": "7kcwlut5xw@mail2tor.com",
+			"onion": "xvl5hqbvt6ppy2pf42rvjkgv4io4mc5oxxehbskirfxy2rngthx5qip7.onion",
+			"telegram": "https://t.me/lafwjdcn",
+			"wallet": "3L0fVmGyEBrJF1eUSqIWobSlaXJv"
+		},
+		"disclosures": {
+			"completed": 10,
+			"total": 12
+		},
+		"leakSize": {
+			"value": 179,
+			"unit": "GB"
+		},
+		"leakFiles": 195086,
+		"target": {
+			"name": "Target6",
+			"website": "https://www.example.es/",
+			"size": 248,
+			"revenue": {
+				"value": 37.851000000000006,
+				"multiplier": "M",
+				"unit": "€"
+			},
+			"region": "León",
+			"sector": "Agrícola"
+		},
+		"detectedAt": "2025-05-15T18:33:47.621Z",
+		"reputationalImpact": "Aparece en prensa",
+		"description": "Laborum sed do excepteur laborum ipsum amet cillum excepteur officia tempor eu amet ipsum reprehenderit sit duis ipsum ipsum aute ut non consectetur duis sunt exercitation in adipiscing ullamco duis mollit et id nisi cillum quis id excepteur minim eu incididunt amet mollit in cupidatat sint irure consectetur magna tempor reprehenderit"
+	},
+	{
+		"cybercriminal": {
+			"name": "Cybercriminal1",
+			"email": "7kcwlut5xw@mail2tor.com",
+			"onion": "xvl5hqbvt6ppy2pf42rvjkgv4io4mc5oxxehbskirfxy2rngthx5qip7.onion",
+			"telegram": "https://t.me/lafwjdcn",
+			"wallet": "3L0fVmGyEBrJF1eUSqIWobSlaXJv"
+		},
+		"disclosures": {
+			"completed": 10,
+			"total": 12
+		},
+		"leakSize": {
+			"value": 179,
+			"unit": "GB"
+		},
+		"leakFiles": 195086,
+		"target": {
+			"name": "Target5",
+			"website": "https://www.example.es/",
+			"size": 248,
+			"revenue": {
+				"value": 37.851000000000006,
+				"multiplier": "M",
+				"unit": "€"
+			},
+			"region": "Palencia",
+			"sector": "Agrícola"
+		},
+		"detectedAt": "2025-05-29T18:33:47.621Z",
+		"reputationalImpact": "Aparece en prensa",
+		"description": "Laborum sed do excepteur laborum ipsum amet cillum excepteur officia tempor eu amet ipsum reprehenderit sit duis ipsum ipsum aute ut non consectetur duis sunt exercitation in adipiscing ullamco duis mollit et id nisi cillum quis id excepteur minim eu incididunt amet mollit in cupidatat sint irure consectetur magna tempor reprehenderit"
 	}
 ]

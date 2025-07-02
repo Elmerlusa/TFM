@@ -14,7 +14,10 @@ if __name__ == '__main__':
         try:
             data = json.load(f)
             for d in data:
-                d['detectedAt'] = datetime.datetime.fromisoformat(d['detectedAt'])
+                try:
+                    d['detectedAt'] = datetime.datetime.fromisoformat(d['detectedAt'])
+                except:
+                    pass
             mongodb.scraped_attacks.insert_many(data)
         except json.JSONDecodeError as e:
             pass
