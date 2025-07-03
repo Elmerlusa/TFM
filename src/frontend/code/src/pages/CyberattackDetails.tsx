@@ -4,7 +4,7 @@ import { ICyberattackDetails } from "../Interfaces";
 import { Card, Col, Container, ProgressBar, Row } from "react-bootstrap";
 import { formatIsoStringDate } from "../utils/utils";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEnvelope, faGlobe, faIndustry, faMapLocationDot, faMoneyBill, faT, faUserGroup, faWallet } from "@fortawesome/free-solid-svg-icons";
+import { faEnvelope, faGlobe, faIndustry, faMapLocationDot, faMoneyBill, faNewspaper, faT, faUserGroup, faWallet } from "@fortawesome/free-solid-svg-icons";
 import { faTelegram } from "@fortawesome/free-brands-svg-icons";
 
 const CyberattackDetails = () => {
@@ -56,6 +56,7 @@ const CyberattackDetails = () => {
 					}
 					{cyberattackDetails.reputationalImpact &&
 						<p>
+							<FontAwesomeIcon icon={faNewspaper} className="me-2" />
 							{cyberattackDetails.reputationalImpact}
 						</p>
 					}
@@ -63,7 +64,7 @@ const CyberattackDetails = () => {
 						<>
 							<div className="d-flex justify-content-between fs-6 mb-2">
 								<span>
-									Progreso: {disclosurePercentage}%
+									Progreso: {disclosurePercentage.toFixed(2)}%
 								</span>
 								<span>
 									{cyberattackDetails.disclosures.completed} publicaciones de {cyberattackDetails.disclosures.total}
