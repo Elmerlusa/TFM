@@ -159,7 +159,7 @@
 			"total": 12
 		},
 		"leakSize": {
-			"value": 179,
+			"value": 19,
 			"unit": "GB"
 		},
 		"leakFiles": 195086,
@@ -189,8 +189,8 @@
 			"total": 12
 		},
 		"leakSize": {
-			"value": 179,
-			"unit": "GB"
+			"value": 12,
+			"unit": "TB"
 		},
 		"leakFiles": 195086,
 		"target": {
@@ -250,7 +250,7 @@
 			"total": 12
 		},
 		"leakSize": {
-			"value": 179,
+			"value": 562,
 			"unit": "GB"
 		},
 		"leakFiles": 195086,
@@ -283,7 +283,7 @@
 			"total": 12
 		},
 		"leakSize": {
-			"value": 179,
+			"value": 312,
 			"unit": "GB"
 		},
 		"leakFiles": 195086,

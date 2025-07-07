@@ -1,6 +1,6 @@
 from pymongo import MongoClient
 import json
-import datetime
+from dateutil import parser
 
 if __name__ == '__main__':
     mongouri = 'mongodb://localhost:27017'
@@ -15,7 +15,7 @@ if __name__ == '__main__':
             data = json.load(f)
             for d in data:
                 try:
-                    d['detectedAt'] = datetime.datetime.fromisoformat(d['detectedAt'])
+                    d['detectedAt'] = parser.parse(d['detectedAt'])
                 except:
                     pass
             mongodb.scraped_attacks.insert_many(data)
