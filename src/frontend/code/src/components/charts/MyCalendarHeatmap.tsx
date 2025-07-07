@@ -10,8 +10,9 @@ interface Props {
 
 const MyCalendarHeatmap = ({
 	data,
-	cellSize = 30,
-	monthsToShow = 4
+	title,
+	cellSize = 25,
+	monthsToShow = 3
 }: Props) => {
 	const ref = useRef<SVGSVGElement | null>(null);
 	const containerRef = useRef<HTMLDivElement | null>(null);
@@ -25,7 +26,7 @@ const MyCalendarHeatmap = ({
 			const newWidth = containerWidth;
 
 			const minCellSize = 10;
-			const maxCellSize = 45;
+			const maxCellSize = 43;
 			const calculatedCellSize = Math.max(minCellSize, Math.min(maxCellSize, newWidth / (monthsToShow * 8)));
 
 			const cellPadding = Math.max(2, calculatedCellSize * 0.2);
@@ -292,6 +293,23 @@ const MyCalendarHeatmap = ({
 			.attr("stroke", "white");
 	}, []);
 
+	const addTitle = useCallback((
+		svg: d3.Selection<SVGSVGElement | null, unknown, null, undefined>,
+		title: string,
+		currentWidth: number,
+		currentHeight: number
+	) => {
+		const titleFontSize = Math.max(12, 12 * (currentWidth / 500));
+		svg.append("text")
+			.attr("x", currentWidth / 2)
+			.attr("y", 30)
+			.attr("text-anchor", "middle")
+			.attr("font-size", `${titleFontSize}px`)
+			.attr("font-weight", "bold")
+			.attr("fill", "white")
+			.text(title);
+	}, []);
+
 	const renderCalendar = useCallback(() => {
 		if (!data) return;
 
@@ -324,7 +342,9 @@ const MyCalendarHeatmap = ({
 
 		createLegend(svg, color, currentWidth, currentHeight, calendarHeight, margin);
 
-	}, [data, dimensions, responsiveCellSize, createCalendarDates, createColorScale, renderCalendarMonths, createLegend, createTooltip]);
+		addTitle(svg, title, currentWidth, currentHeight);
+
+	}, [data, title, dimensions, responsiveCellSize, createCalendarDates, createColorScale, renderCalendarMonths, createLegend, createTooltip, addTitle]);
 
 	useEffect(() => {
 		updateDimensions();

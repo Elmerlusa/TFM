@@ -180,7 +180,7 @@ const SpainChart = ({ data, title, footer = "", width, height }: Props) => {
 					.on("end", () => tooltip.html(""));
 			});
 
-		const titleFontSize = Math.max(12, 16 * scaleFactor);
+		const titleFontSize = Math.max(12, 16 * (currentWidth / 500));
 		svg.append("text")
 			.attr("x", currentWidth / 2)
 			.attr("y", 30 * scaleFactor)

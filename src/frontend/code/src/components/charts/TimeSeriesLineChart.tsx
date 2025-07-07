@@ -62,13 +62,13 @@ const TimeSeriesLineChart = ({
 		if (dateKeys.length === 0) return [];
 
 		// Filter data to only include dates within the last year
-		const oneYearAgo = new Date();
-		oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 2);
+		const threeMonthsAgo = new Date();
+		threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
 
 		const filteredData: Record<string, number> = {};
 		dateKeys.forEach(dateStr => {
 			const date = new Date(dateStr);
-			if (date >= oneYearAgo) {
+			if (date >= threeMonthsAgo) {
 				filteredData[dateStr] = rawData[dateStr];
 			}
 		});
@@ -76,15 +76,10 @@ const TimeSeriesLineChart = ({
 		const filteredDateKeys = Object.keys(filteredData);
 		if (filteredDateKeys.length === 0) return [];
 
-		// Parse dates and sort
-		const dates = filteredDateKeys
-			.map(dateStr => new Date(dateStr))
-			.sort((a, b) => a.getTime() - b.getTime());
-
 		const now = new Date();
 		// Get date range
-		let startDate = dates[0];
-		const endDate = d3.timeMonth.offset(dates[dates.length - 1], 0); // day 31
+		let startDate = threeMonthsAgo;
+		const endDate = d3.timeMonth.offset(now, 0); // day 31
 		const monthDiff = (endDate.getFullYear() - startDate.getFullYear()) * 12 + (endDate.getMonth() - startDate.getMonth());
 
 		if (monthDiff < 2) {
@@ -178,7 +173,7 @@ const TimeSeriesLineChart = ({
 
 		// Add axes
 		const nonZeroDates = processedData
-			.filter(d => d.count !== 0)
+			.filter((d, i) => i === 0 || i === processedData.length - 1 || d.count !== 0)
 			.map(d => d.date);
 
 		const uniqueDates = Array.from(new Set(nonZeroDates.map(d => d.getTime())))

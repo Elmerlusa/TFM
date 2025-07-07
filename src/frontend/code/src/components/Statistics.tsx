@@ -63,22 +63,23 @@ const Statistics = ({ stats, renderCybercriminalCounts = false }: Props) => {
 				renderCybercriminalCounts ? (
 					<>
 						<Row>
-							<MyCalendarHeatmap data={stats.detectedAtCounts} title="Ciberataques en los últimos 3 meses" />
+							<h2 className="text-center mb-0 mt-4">Número de ciberataques en los últimos 3 meses</h2>
+							<MyCalendarHeatmap data={stats.detectedAtCounts} title="" />
 						</Row>
 						<Row>
 							<Col className="text-center">
-								<BarChart data={stats?.cybercriminalCounts} title="Ciberataques según el atacante" />
+								<BarChart data={stats?.cybercriminalCounts} title="Número de ciberataques según el atacante" />
 							</Col>
 							<Col className="text-center">
-								<SpainChart data={stats?.regionCounts} title="Ciberataques por provincia" />
+								<SpainChart data={stats?.regionCounts} title="Número de ciberataques por provincia" />
 							</Col>
 						</Row>
 						<Row>
 							<Col xl={6} className="text-center">
-								<BarChart data={stats?.targetCounts} title="Ciberataques según su objetivo" horizontal />
+								<BarChart data={stats?.targetCounts} title="Número de ciberataques según su objetivo" horizontal />
 							</Col>
 							<Col xl={6} className="text-center">
-								<PieChart data={stats?.sectorCounts} title="Ciberataques según su objetivo" />
+								<PieChart data={stats?.sectorCounts} title="Frecuencia de ciberataques por sector" />
 							</Col>
 						</Row>
 					</>
@@ -86,18 +87,18 @@ const Statistics = ({ stats, renderCybercriminalCounts = false }: Props) => {
 					<>
 						<Row>
 							<Col xl={6} className="text-center">
-								<TimeSeriesLineChart data={stats?.detectedAtCounts} title="Perfil temporal de ciberataques" />
+								<TimeSeriesLineChart data={stats?.detectedAtCounts} title="Número de ciberataques en los últimos tres meses" />
 							</Col>
 							<Col className="text-center">
-								<SpainChart data={stats?.regionCounts} title="Ciberataques por provincia" />
+								<SpainChart data={stats?.regionCounts} title="Número de ciberataques por provincia" />
 							</Col>
 						</Row>
 						<Row>
 							<Col xl={6} className="text-center">
-								<BarChart data={stats?.targetCounts} title="Ciberataques según su objetivo" horizontal />
+								<BarChart data={stats?.targetCounts} title="Número de ciberataques según su objetivo" horizontal />
 							</Col>
 							<Col xl={6} className="text-center">
-								<PieChart data={stats?.sectorCounts} title="Ciberataques según su objetivo" />
+								<PieChart data={stats?.sectorCounts} title="Frecuencia de ciberataques por sector" />
 							</Col>
 						</Row>
 					</>
