@@ -27,10 +27,12 @@ if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
     mongo = MongoWrapper()
     env_dir = os.getenv('INPUT_DIR', f'/app/data')
-    env_file_suffix = os.getenv('INPUT_FILE_SUFFIX', f'_scraped_data_{date.today().strftime("%Y%m%d")}.json')
+    env_file_suffix = os.getenv('INPUT_FILE_SUFFIX', f'_scraped_data_{date.today().strftime("%Y-%m-%d")}.json')
     
     mongo.save_last_scrape()
 
+    logging.error(f'{env_dir}/*{env_file_suffix}')
+    logging.error(glob.glob(f'/app/'))
     for file in glob.glob(f'{env_dir}/*{env_file_suffix}'):
         if not os.path.isfile(file):
             continue

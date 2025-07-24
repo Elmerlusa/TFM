@@ -1,0 +1,99 @@
+[
+	{
+		"cybercriminal": {
+			"name": "group1"
+		},
+		"target": {
+			"name": "target1",
+			"website": "https://www.target1.es/",
+			"size": "248",
+			"revenue": "$37.9M"
+		},
+		"disclosures": "1/1",
+		"leakSize": "179 GB",
+		"leakFiles": "195,086 files",
+		"scrapedAt": "2025-07-01T13:13:41.786Z"
+	},
+	{
+		"cybercriminal": {
+			"name": "group1"
+		},
+		"target": {
+			"name": "target2",
+			"website": "https://www.target2.es/",
+			"size": "518",
+			"revenue": "$289M"
+		},
+		"disclosures": "41/82",
+		"leakSize": "1.9 TB",
+		"leakFiles": "754,871 files",
+		"scrapedAt": "2025-07-01T13:13:43.982Z"
+	},
+	{
+		"cybercriminal": {
+			"name": "group1"
+		},
+		"target": {
+			"name": "target3",
+			"website": "https://www.target3.es/",
+			"size": "142",
+			"revenue": "$19.1M"
+		},
+		"scrapedAt": "2025-07-01T13:13:44.211Z"
+	},
+	{
+		"cybercriminal": {
+			"name": "group1"
+		},
+		"target": {
+			"name": "target4",
+			"website": "https://www.target4.es/",
+			"size": "302",
+			"revenue": "$87.6M"
+		},
+		"disclosures": "1/1",
+		"leakSize": "233 GB",
+		"leakFiles": "554,821 files",
+		"scrapedAt": "2025-07-01T13:13:46.362Z"
+	},
+	{
+		"cybercriminal": {
+			"name": "group1"
+		},
+		"target": {
+			"name": "target5",
+			"website": "https://www.target5.es/",
+			"size": "59",
+			"revenue": "$29.4M"
+		},
+		"disclosures": "3/5",
+		"leakSize": "12.2 GB",
+		"leakFiles": "17,536 files",
+		"scrapedAt": "2025-07-01T13:13:48.775Z"
+	},
+	{
+		"cybercriminal": {
+			"name": "group1"
+		},
+		"target": {
+			"name": "target6",
+			"website": "https://www.target6.es/",
+			"size": "148",
+			"revenue": "$30.9M"
+		},
+		"disclosures": "3/5",
+		"leakSize": "53 GB",
+		"leakFiles": "858,621 files",
+		"scrapedAt": "2025-07-01T13:13:49.997Z"
+	},
+	{
+		"cybercriminal": {
+			"name": "group1"
+		},
+		"target": {
+			"name": "target7",
+			"website": "https://www.target7.es/"
+		},
+		"scrapedAt": "2025-07-01T13:13:51.234Z"
+	}
+]

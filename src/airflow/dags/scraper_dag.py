@@ -33,9 +33,9 @@ scraper_task = DockerOperator(
     auto_remove=True,
     docker_url='unix://var/run/docker.sock',
     network_mode='src_tfm_network',
-    mounts=[Mount(source='C:/Users/marti/Desktop/TFM/src/.volumes/scraper', target='/app/data', type='bind')],
+    mounts=[Mount(source='C:/Users/marti/Desktop/MartinGallegoJavierCodigoFuenteTFM/src/.volumes/scraper', target='/app/data', type='bind')],
     environment={
-		'OUTPUT_DIR': '/app/data',
+		'INPUT_DIR': '/app/data',
         'OUTPUT_FILE_SUFFIX': '_scraped_data_{{ ds }}.json',
     },
     dag=dag,
@@ -76,7 +76,7 @@ etl_task = DockerOperator(
     auto_remove=True,
     docker_url='unix://var/run/docker.sock',
     network_mode='src_tfm_network',
-    mounts=[Mount(source='C:/Users/marti/Desktop/TFM/src/.volumes/scraper', target='/app/data', type='bind')],
+    mounts=[Mount(source='C:/Users/marti/Desktop/MartinGallegoJavierCodigoFuenteTFM/src/.volumes/scraper', target='/app/data', type='bind')],
     environment={
         'INPUT_DIR': '/app/data',
         'INPUT_FILE_SUFFIX': '_scraped_data_{{ ds }}.json'

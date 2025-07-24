@@ -7,7 +7,7 @@ if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
     scraper = TorWebScraper()
     try:
-        # scraper.rotate_tor_identity()
+        scraper.rotate_tor_identity()
         scraper.setup_chrome_with_tor()
         scrape_hunters = ScrapeHuntersPage(scraper)
         scrape_hunters.scrape()

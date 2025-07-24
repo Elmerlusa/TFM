@@ -53,7 +53,7 @@ def parse_date_iso_format(date: str):
 
 def parse_attack_data(data):
 	target_args = data.get('target', {})
-	cybercriminal_name = parse_str(data.get('cybercriminalName'))
+	cybercriminal_name = parse_str(data.get('cybercriminal').get('name'))
 	target_name = parse_str(target_args.get('name'))
 	parsed_data = {
 		'cybercriminal': {
